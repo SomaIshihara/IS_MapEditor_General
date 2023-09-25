@@ -184,6 +184,7 @@
     </ClCompile>
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="texture.cpp" />
+    <ClCompile Include="userdef.cpp" />
     <ClCompile Include="xmodel.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -212,6 +213,7 @@
     <ClInclude Include="precompile.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="texture.h" />
+    <ClInclude Include="userdef.h" />
     <ClInclude Include="xmodel.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

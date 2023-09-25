@@ -495,6 +495,9 @@ void CGUIChangeObj::Update(void)
 			CManager::GetPlayer()->UnsetSelObj();
 			pObject->Uninit();
 		}
+
+		//ユーザー定義
+		ImGui::Text("User Definition");
 	}
 	else
 	{//してないよ
