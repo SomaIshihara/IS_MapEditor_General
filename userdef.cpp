@@ -214,7 +214,10 @@ void CVariableManager::ReadUserDefData(const char * pPath)
 			}
 			else if (bRead == true)
 			{//“Ç‚ÝŽæ‚è
-				Analysis(&aCode[0]);
+				if (aCode[0] != '\0' && aCode[0] != '\n')
+				{
+					Analysis(&aCode[0]);
+				}
 			}
 		}
 	}
