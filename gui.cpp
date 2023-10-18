@@ -13,6 +13,7 @@
 #include "input.h"
 #include "player.h"
 #include "xmodel.h"
+#include "objloader.h"
 
 //************************************************
 //オブジェ追加
@@ -216,7 +217,7 @@ void CGUIAddObj::Update(void)
 					nPathLen++;	//スラッシュ2つ分も消す
 					strcpy(&aRelat[0], (_strdup(szFile) + nPathLen));
 
-					CObjectX::LoadData(&aRelat[0]);
+					CObjLoader::LoadData(&aRelat[0]);
 				}
 			}
 			else if (ImGui::MenuItem("Save MapData"))
@@ -251,7 +252,8 @@ void CGUIAddObj::Update(void)
 						strcat(&aRelat[0], ".ismd");
 					}
 
-					CObjectX::SaveData(&aRelat[0]);
+					
+					CObjLoader::SaveData(&aRelat[0]);
 				}
 			}
 			ImGui::EndMenu();
@@ -314,7 +316,7 @@ void CGUIAddObj::Update(void)
 				posCloss.x = ceilf(posCloss.x);
 				posCloss.y = ceilf(posCloss.y);
 				posCloss.z = ceilf(posCloss.z);
-				CObjectX::Create(posCloss, CManager::VEC3_ZERO, m_SelectObj);
+ 				CObjectX::Create(posCloss, CManager::VEC3_ZERO, m_SelectObj);
 			}
 		}
 	}
@@ -498,6 +500,38 @@ void CGUIChangeObj::Update(void)
 
 		//ユーザー定義
 		ImGui::Text("User Definition");
+
+		CVariableManager* pVariableManager = CManager::GetVariableManager();
+		for (int cnt = 0; cnt < pVariableManager->GetDefinedNum(); cnt++)
+		{
+			switch (pObject->GetVariable()[cnt]->GetType())
+			{
+			case CVariable::Integer:
+				{
+					int nData = *(int*)pObject->GetVariable()[cnt]->GetData();
+					ImGui::InputInt(pObject->GetVariable()[cnt]->GetName(), &nData);
+					pObject->GetVariable()[cnt]->SetData(&nData);
+				}
+				break;
+			case CVariable::Float:
+				{
+					float fData = *(float*)pObject->GetVariable()[cnt]->GetData();
+					ImGui::InputFloat(pObject->GetVariable()[cnt]->GetName(), &fData);
+					pObject->GetVariable()[cnt]->SetData(&fData);
+				}
+				break;
+			case CVariable::Boolean:
+				{
+					bool bData = (*(unsigned char*)pObject->GetVariable()[cnt]->GetData() == 0xff) ? true : false;
+					ImGui::Checkbox(pObject->GetVariable()[cnt]->GetName(), &bData);
+					pObject->GetVariable()[cnt]->SetData(&bData);
+				}
+				break;
+			default:
+				assert(false);
+				break;
+			}
+		}
 	}
 	else
 	{//してないよ

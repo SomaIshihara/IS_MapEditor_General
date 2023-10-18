@@ -4,7 +4,6 @@
 //Author:êŒå¥ÈDîn
 //
 //======================================================
-#include "precompile.h"
 #include "userdef.h"
 
 //=================================
@@ -48,7 +47,7 @@ void CVariableManager::Analysis(char* pCode)
 		{
 			nData = atoi(pDataRaw);
 		}
-		Definition(pName, nUseByte, &nData);
+		Definition(CVariable::Integer, pName, &nData);
 	}
 	else if (strcmp(pType, "float") == 0)
 	{//floatå^
@@ -59,7 +58,7 @@ void CVariableManager::Analysis(char* pCode)
 		{
 			fData = atof(pDataRaw);
 		}
-		Definition(pName, nUseByte, &fData);
+		Definition(CVariable::Float, pName, &fData);
 	}
 	else if (strcmp(pType, "bool") == 0)
 	{//boolå^
@@ -70,29 +69,41 @@ void CVariableManager::Analysis(char* pCode)
 		{
 			bData = (strcmp(pDataRaw, "true") == 0) ? 0xff : 0x00;
 		}
-		Definition(pName, nUseByte, &bData);
+		Definition(CVariable::Boolean, pName, &bData);
 	}
 }
 
 //=================================
 //ïœêîíËã`
 //=================================
-void CVariableManager::Definition(const char * pName, const int nUseByte, void* pData)
+void CVariableManager::Definition(const CVariable::TYPE type, const char* pName, void* pData)
 {
 	if (m_nVariableNum < VARIABLE_NUM)
 	{
 		//íËã`ópïœêîìÆìIämï€
 		m_definedVariable[m_nVariableNum] = new CVariable::Variable;
 
+		//ïœêîå^
+		m_definedVariable[m_nVariableNum]->type = type;
+
 		//ïœêîñº
 		int nLength = strlen(pName) + 1;
 		m_definedVariable[m_nVariableNum]->pName = new char[nLength];
 		strcpy(m_definedVariable[m_nVariableNum]->pName, pName);
 
-		//ÉoÉCÉgêî
-		m_definedVariable[m_nVariableNum]->nUseByte = nUseByte;
-
 		//èâä˙ílÅiÇ†ÇÍÇŒÅj
+		int nUseByte = 0;
+		switch (type)
+		{
+		case CVariable::Integer:
+			nUseByte = 4;
+			break;
+		case CVariable::Float:
+			nUseByte = 4;
+			break;
+		case CVariable::Boolean:
+			nUseByte = 1;
+		}
 		m_definedVariable[m_nVariableNum]->pData = new char[nUseByte];
 		if (pData != nullptr)
 		{
@@ -117,6 +128,7 @@ void CVariableManager::ReleaseAll(void)
 			m_definedVariable[cnt] = nullptr;
 		}
 	}
+	m_nVariableNum = 0;
 }
 
 //=================================
@@ -132,11 +144,11 @@ CVariable* CVariableManager::Declaration(const char * pName, void * pData)
 
 			if (pData != nullptr)
 			{
-				pVariable->Declaration(m_definedVariable[cnt]->nUseByte, &m_definedVariable[cnt]->pName[0], pData);
+				pVariable->Declaration(m_definedVariable[cnt]->type, &m_definedVariable[cnt]->pName[0], pData);
 			}
 			else
 			{
-				pVariable->Declaration(m_definedVariable[cnt]->nUseByte, &m_definedVariable[cnt]->pName[0], m_definedVariable[cnt]->pData);
+				pVariable->Declaration(m_definedVariable[cnt]->type, &m_definedVariable[cnt]->pName[0], m_definedVariable[cnt]->pData);
 			}
 
 			return pVariable;
@@ -218,22 +230,59 @@ void CVariableManager::ReadUserDefData(const char * pPath)
 //=================================
 //ïœêîêÈåæ
 //=================================
-void CVariable::Declaration(const int nUseByte, const char * pName, void * pData)
+void CVariable::Declaration(const TYPE type, const char * pName, void * pData)
 {
+	//ïœêîå^äiî[
+	m_variable.type = type;
+
 	//ïœêîÉTÉCÉYäiî[
-	m_variable.nUseByte = nUseByte;
+	switch (type)
+	{
+	case Integer:
+		m_variable.nUseByte = 4;
+		break;
+	case Float:
+		m_variable.nUseByte = 4;
+		break;
+	case Boolean:
+		m_variable.nUseByte = 1;
+	}
 
 	//ïœêîñºäiî[
 	m_variable.pName = new char[strlen(pName) + 1];
 	strcpy(&m_variable.pName[0], pName);
 
 	//ïœêîÉTÉCÉYê›íË
-	m_variable.pData = new char[nUseByte];
+	m_variable.pData = new char[m_variable.nUseByte];
 
 	//ïœêîÇÃílÇ™Ç†ÇÍÇŒë„ì¸
 	if (pData != nullptr)
 	{//ë„ì¸
-		memcpy(m_variable.pData, pData, nUseByte);
+		memcpy(m_variable.pData, pData, m_variable.nUseByte);
+	}
+}
+
+//=================================
+//ïœêîê›íË
+//=================================
+void CVariable::SetData(void * pData)
+{
+	switch (this->m_variable.type)
+	{
+	case CVariable::Integer:
+		memcpy(m_variable.pData, (int*)pData, m_variable.nUseByte);
+		break;
+	case CVariable::Float:
+		memcpy(m_variable.pData, (float*)pData, m_variable.nUseByte);
+		break;
+	case CVariable::Boolean:
+	{
+		char bData = (*(bool*)pData == true) ? 0xff : 0x00;
+		memcpy(m_variable.pData, &bData, m_variable.nUseByte);
+	}
+		break;
+	default:
+		break;
 	}
 }
 
