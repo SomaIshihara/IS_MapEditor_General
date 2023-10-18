@@ -20,6 +20,7 @@ class CTexture;
 class CMeshField;
 class CGUIAddObj;
 class CGUIChangeObj;
+class CVariableManager;
 
 class CManager
 {
@@ -53,6 +54,7 @@ public:
 	static CLight* GetLight(void) { return m_pLight; }
 	static CTexture* GetTexture(void) { return m_pTexture; }
 	static CMeshField* GetMeshField(void) { return m_pMeshField; }
+	static CVariableManager* GetVariableManager(void) { return m_pVariableManager; }
 
 private:
 	//変数
@@ -67,6 +69,7 @@ private:
 	static CMeshField* m_pMeshField;			//メッシュフィールド
 	static CGUIAddObj* m_pGUIAddObj;			//オブジェクト追加GUI
 	static CGUIChangeObj* m_pGUIChangeObj;		//オブジェクト変更GUI
+	static CVariableManager* m_pVariableManager;//変数マネ
 
 	static int m_nFPS;							//FPS
 	static DWORD m_dwFrameCount;				//回したフレーム数

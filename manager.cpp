@@ -18,6 +18,7 @@
 #include "meshsky.h"
 #include "gui.h"
 #include "xmodel.h"
+#include "userdef.h"
 
 //静的メンバ変数
 const int CManager::INT_ZERO = 0;										//int型の0
@@ -39,6 +40,7 @@ CGUIChangeObj* CManager::m_pGUIChangeObj = nullptr;
 int CManager::m_nFPS = 0;
 DWORD CManager::m_dwFrameCount = 0;
 CMeshField* CManager::m_pMeshField = nullptr;
+CVariableManager* CManager::m_pVariableManager = nullptr;
 
 //=================================
 //コンストラクタ
@@ -70,6 +72,7 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	m_pPlayer = new CPlayer;
 	m_pGUIAddObj = CGUIAddObj::Create();
 	m_pGUIChangeObj = CGUIChangeObj::Create();
+	m_pVariableManager = new CVariableManager;
 
 	//レンダラー初期化
 	if (FAILED(m_pRenderer->Init(hWnd, TRUE)))
@@ -118,6 +121,9 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		return E_FAIL;
 	}
 
+	//変数定義
+	m_pVariableManager->ReadUserDefData("data\\system.ini");
+
 	//ImGUI系
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -159,6 +165,14 @@ void CManager::Uninit(void)
 	ImGui_ImplDX9_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
+	//変数マネ破棄
+	if (m_pVariableManager != nullptr)
+	{
+		m_pVariableManager->ReleaseAll();
+		delete m_pVariableManager;
+		m_pVariableManager = nullptr;
+	}
 
 	//プレイヤー破棄
 	if (m_pPlayer != nullptr)
