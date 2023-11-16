@@ -14,6 +14,13 @@
 class CTexture
 {
 public:
+	enum TYPE
+	{
+		TYPE_EDITORPOP = 0,	//エディタに表示するもの
+		TYPE_X,				//Xファイルの読み込み分
+		TYPE_SYSTEM,		//エディタのシステム用
+	};
+
 	//静的const
 	static const int CODE_LENGTH;	//仮置きに必要
 
@@ -36,12 +43,14 @@ public:
 	LPDIRECT3DTEXTURE9 GetAddress(int nIdx);											//テクスチャ取得
 	int GetPatWidth(int nIdx);					//パターン幅取得
 	int GetPatHeight(int nIdx);					//パターン高さ取得
+	char* GetPath(int nIdx);
+	int GetNumAll(void) { return m_nNumAll; }
 
 private:
 	HRESULT LoadTexture(const char* pPath, const int nPatWidth, const int nPatHeight);
 	PatternTexture m_apTexture[MAX_TEXTURE];		//テクスチャポインタ
 	char* m_aFilepath[MAX_TEXTURE];					//テクスチャパス
-	static int m_nNumAll;							//テクスチャ総数
+	int m_nNumAll;									//テクスチャ総数
 };
 
 #endif // !_TEXTURE_H_

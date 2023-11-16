@@ -9,6 +9,7 @@
 
 #include "object.h"
 #include "manager.h"
+#include "texture.h"
 
 //メッシュフィールドクラス
 class CMeshSky : public CObject
@@ -33,6 +34,7 @@ public:
 	//設定
 	void SetPos(const D3DXVECTOR3 pos) { m_pos = pos; }	//位置
 	void SetRot(const D3DXVECTOR3 rot) { m_rot = rot; }	//向き
+	void SetTexType(const CTexture::TYPE type) { m_texType = type; }
 
 	//取得
 	D3DXVECTOR3 GetPos(void) { return m_pos; }
@@ -56,6 +58,7 @@ private:
 	LPDIRECT3DINDEXBUFFER9 m_pIdxBuffMiddle;	//中部インデックスバッファ
 	LPDIRECT3DINDEXBUFFER9 m_pIdxBuffBottom;	//下部インデックスバッファ
 	D3DXMATRIX m_mtxWorld;				//ワールドマトリ
+	CTexture::TYPE m_texType;			//テクスチャタイプ
 
 
 	D3DXVECTOR3 m_pos;	//位置

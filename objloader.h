@@ -44,6 +44,8 @@ public:
 	//ì«Ç›çûÇ›
 	static LOADRESULT LoadData(const char* pPath);
 	static LOADRESULT SaveData(const char* pPath);
+	static LOADRESULT LoadTXTData(const char* pPath);
+	static LOADRESULT SaveTXTData(const char* pPath);
 };
 
 #endif // !_OBJECT_H_

@@ -8,6 +8,9 @@
 #include <string.h>
 #include "main.h"
 #include "manager.h"
+#include "resource.h"
+#include "xmodel.h"
+#include "objloader.h"
 
 //メモリ破壊検出
 #include <crtdbg.h>
@@ -38,12 +41,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 		0,									//使用しない
 		0,									//使用しない
 		hInstance,							//インスタンスハンドル
-		LoadIcon(nullptr,IDI_APPLICATION),		//タスクバーのアイコン
-		LoadCursor(nullptr,IDC_ARROW),			//マウスカーソル
+		LoadIcon(nullptr,IDI_APPLICATION),	//タスクバーのアイコン
+		LoadCursor(nullptr,IDC_ARROW),		//マウスカーソル
 		(HBRUSH)(COLOR_WINDOW + 1),			//クライアント領域の背景色
-		nullptr,								//メニューバー
+		"IDR_MENU1",						//メニューバー
 		CLASS_NAME,							//クラスの名前
-		LoadIcon(nullptr,IDI_APPLICATION)		//アプリケーションのアイコン
+		LoadIcon(nullptr,IDI_APPLICATION)	//アプリケーションのアイコン
 	};
 
 	HWND hWnd;	//ウィンドウハンドル
@@ -61,19 +64,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
 	//ウィンドウを生成
+	//HMENU men = LoadMenu(hInstance, TEXT("IDR_MENU1"));
 	hWnd = CreateWindowEx(
-		0,									//拡張ウィンドウスタイル
-		CLASS_NAME,							//ウィンドウクラスの名前
-		WINDOW_NAME,						//ウィンドウの名前
-		WS_OVERLAPPEDWINDOW,				//ウィンドウスタイル
-		CW_USEDEFAULT,						//ウィンドウの左上X座標
-		CW_USEDEFAULT,						//ウィンドウの左上Y座標
-		(rect.right - rect.left),			//ウィンドウの幅
-		(rect.bottom - rect.top),			//ウィンドウの高さ
+		0,										//拡張ウィンドウスタイル
+		CLASS_NAME,								//ウィンドウクラスの名前
+		WINDOW_NAME,							//ウィンドウの名前
+		WS_OVERLAPPEDWINDOW,					//ウィンドウスタイル
+		CW_USEDEFAULT,							//ウィンドウの左上X座標
+		CW_USEDEFAULT,							//ウィンドウの左上Y座標
+		(rect.right - rect.left),				//ウィンドウの幅
+		(rect.bottom - rect.top),				//ウィンドウの高さ
 		nullptr,								//親ウィンドウのハンドル
-		nullptr,								//メニューハンドルまたは子ウィンドウID
-		hInstance,							//インスタンスハンドル
-		nullptr								//ウィンドウ作成データ
+		nullptr,	//メニューハンドルまたは子ウィンドウID
+		hInstance,								//インスタンスハンドル
+		nullptr									//ウィンドウ作成データ
 	);
 
 	//マネージャ生成
@@ -188,7 +192,137 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return 0;
 		}
 		break;
-	case WM_CREATE:
+	case WM_COMMAND:
+		static OPENFILENAME     ofn;
+		static TCHAR            szPath[MAX_PATH];
+		static TCHAR            szFile[MAX_PATH];
+
+		if (szPath[0] == TEXT('\0')) {
+			GetCurrentDirectory(MAX_PATH, szPath);
+		}
+		if (ofn.lStructSize == 0) {
+			ofn.lStructSize = sizeof(OPENFILENAME);
+			ofn.hwndOwner = FindWindow(nullptr, TEXT(WINDOW_NAME));
+			ofn.lpstrInitialDir = szPath;       // 初期フォルダ位置
+			ofn.lpstrFile = szFile;       // 選択ファイル格納
+			ofn.nMaxFile = MAX_PATH;
+			ofn.Flags = OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+		}
+
+		switch (LOWORD(wParam))
+		{
+		case ID_XREAD:
+			ofn.lpstrFilter = TEXT("Xファイル(*.x)\0*.x\0");
+			ofn.lpstrTitle = TEXT("モデルファイルを選択");
+			if (GetOpenFileName(&ofn)) {
+				//相対パス化
+				char aRelat[256];
+				int nPathLen = strlen(_strdup(szPath));
+				nPathLen++;	//スラッシュ2つ分も消す
+				strcpy(&aRelat[0], (_strdup(szFile) + nPathLen));
+
+				CXModel::Load(&aRelat[0]);
+			}
+			break;
+		case ID_MLLOAD:
+			ofn.lpstrFilter = TEXT("モデルリストファイル(*.isml)\0*.isml\0");
+			ofn.lpstrTitle = TEXT("モデルリストファイルを読み込み");
+			if (GetOpenFileName(&ofn)) {
+				//相対パス化
+				char aRelat[256];
+				int nPathLen = strlen(_strdup(szPath));
+				nPathLen++;	//スラッシュ2つ分も消す
+				strcpy(&aRelat[0], (_strdup(szFile) + nPathLen));
+
+				CXModel::LoadList(&aRelat[0]);
+			}
+			break;
+		case ID_MLWRITE:
+			ofn.lpstrFilter = TEXT("モデルリストファイル(*.isml)\0*.isml\0");
+			ofn.lpstrTitle = TEXT("モデルリストファイルを保存");
+			ofn.Flags = OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_OVERWRITEPROMPT;
+			if (GetSaveFileName(&ofn)) {
+				//相対パス化
+				char aRelat[256];
+				int nPathLen = strlen(_strdup(szPath));
+				nPathLen++;	//スラッシュ2つ分も消す
+				strcpy(&aRelat[0], (_strdup(szFile) + nPathLen));
+				//ファイルパスに拡張子がなければ付け足す
+				char* pSearch = strstr(&aRelat[0], ".isml");
+				if (pSearch == nullptr)
+				{
+					strcat(&aRelat[0], ".isml");
+				}
+
+				CXModel::SaveList(&aRelat[0]);
+			}
+			break;
+		case ID_MDLOAD:
+			ofn.lpstrFilter = TEXT("マップデータファイル(*.ismd)\0*.ismd\0");
+			ofn.lpstrTitle = TEXT("マップデータファイルを読み込み");
+			if (GetOpenFileName(&ofn)) {
+				//相対パス化
+				char aRelat[256];
+				int nPathLen = strlen(_strdup(szPath));
+				nPathLen++;	//スラッシュ2つ分も消す
+				strcpy(&aRelat[0], (_strdup(szFile) + nPathLen));
+
+				CObjLoader::LoadData(&aRelat[0]);
+			}
+			break;
+		case ID_MDWRITE:
+			ofn.lpstrFilter = TEXT("マップデータファイル(*.ismd)\0*.ismd\0");
+			ofn.lpstrTitle = TEXT("マップデータファイルを保存");
+			ofn.Flags = OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_OVERWRITEPROMPT;
+			if (GetSaveFileName(&ofn)) {
+				//相対パス化
+				char aRelat[256];
+				int nPathLen = strlen(_strdup(szPath));
+				nPathLen++;	//スラッシュ2つ分も消す
+				strcpy(&aRelat[0], (_strdup(szFile) + nPathLen));
+				//ファイルパスに拡張子がなければ付け足す
+				char* pSearch = strstr(&aRelat[0], ".ismd");
+				if (pSearch == nullptr)
+				{
+					strcat(&aRelat[0], ".ismd");
+				}
+
+				CObjLoader::SaveData(&aRelat[0]);
+			}
+			break;
+		case ID_TXTWRITE:
+			ofn.lpstrFilter = TEXT("TXT形式マップデータファイル(*.txt)\0*.txt\0");
+			ofn.lpstrTitle = TEXT("TXT形式マップデータファイルを保存");
+			ofn.Flags = OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_OVERWRITEPROMPT;
+			if (GetSaveFileName(&ofn)) {
+				//相対パス化
+				char aRelat[256];
+				int nPathLen = strlen(_strdup(szPath));
+				nPathLen++;	//スラッシュ2つ分も消す
+				strcpy(&aRelat[0], (_strdup(szFile) + nPathLen));
+				//ファイルパスに拡張子がなければ付け足す
+				char* pSearch = strstr(&aRelat[0], ".txt");
+				if (pSearch == nullptr)
+				{
+					strcat(&aRelat[0], ".txt");
+				}
+
+				CObjLoader::SaveTXTData(&aRelat[0]);
+			}
+			break;
+		case ID_EXIT:
+			nID = MessageBox(hWnd, "終了しますか？", "終了メッセージ", MB_YESNO);
+
+			if (nID == IDYES)
+			{
+				DestroyWindow(hWnd);	//Destroyメッセージを送る
+			}
+			break;
+		case ID_CAMSET:
+			break;
+		case ID_LIGSET:
+			break;
+		}
 		break;
 	}
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);

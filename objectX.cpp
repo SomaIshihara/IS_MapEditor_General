@@ -86,7 +86,7 @@ void CObjectX::Update(void)
 void CObjectX::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	//デバイス取得
-	CTexture* pTexture = CManager::GetTexture();						//テクスチャオブジェクト取得
+	CTexture* pTexture = CManager::GetTextureX();						//テクスチャオブジェクト取得
 	D3DXMATRIX mtxRot, mtxTrans, mtxTexture;							//計算用
 	D3DMATERIAL9 matDef;												//現在のマテリアル保存用
 	D3DXMATERIAL *pMat;													//マテリアルデータへのポインタ

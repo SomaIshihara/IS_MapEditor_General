@@ -33,7 +33,9 @@ CInputMouse* CManager::m_pInputMouse = nullptr;
 CDebugProc* CManager::m_pDebProc = nullptr;
 CCamera* CManager::m_pCamera = nullptr;
 CLight* CManager::m_pLight = nullptr;
-CTexture* CManager::m_pTexture = nullptr;
+CTexture* CManager::m_pTextureEditorPop = nullptr;
+CTexture* CManager::m_pTextureX = nullptr;
+CTexture* CManager::m_pTextureSystem = nullptr;
 CPlayer* CManager::m_pPlayer = nullptr;
 CGUIAddObj* CManager::m_pGUIAddObj = nullptr;
 CGUIChangeObj* CManager::m_pGUIChangeObj = nullptr;
@@ -68,7 +70,9 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	m_pDebProc = new CDebugProc;
 	m_pCamera = new CCamera;
 	m_pLight = new CLight;
-	m_pTexture = new CTexture;
+	m_pTextureEditorPop = new CTexture;			//オブジェクト用
+	m_pTextureX = new CTexture;					//Xファイル用
+	m_pTextureSystem = new CTexture;			//システム用
 	m_pPlayer = new CPlayer;
 	m_pGUIAddObj = CGUIAddObj::Create();
 	m_pGUIChangeObj = CGUIChangeObj::Create();
@@ -108,12 +112,13 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	}
 
 	//テクスチャ初期化
-	if (FAILED(m_pTexture->Load("data\\preload.txt")))
+	if (FAILED(m_pTextureEditorPop->Load("data\\preload.txt")))
 	{
 		return E_FAIL;
 	}
+
 	//システムで必要なものをこっちで読み込み
-	m_pTexture->Regist("data\\TEXTURE\\Tex_AddObj.png");
+	m_pTextureSystem->Regist("data\\TEXTURE\\Tex_AddObj.png");
 
 	//プレイヤー初期化
 	if (FAILED(m_pPlayer->Init()))
@@ -138,9 +143,12 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	ImGui_ImplDX9_Init(m_pRenderer->GetDevice());// GetGlyphRangesJapanese
 
 	m_pMeshField = CMeshField::Create(D3DXVECTOR3(-1280.0f, 0.0f, 1280.0f), CManager::VEC3_ZERO, 64.0f, 64.0f, 40, 40);
-	m_pMeshField->BindTexture(m_pTexture->Regist("data\\TEXTURE\\line.png"));
+	m_pMeshField->BindTexture(m_pTextureSystem->Regist("data\\TEXTURE\\line.png"));
+	m_pMeshField->SetTexType(CTexture::TYPE_SYSTEM);
 
-	CMeshSky::Create(CManager::VEC3_ZERO, CManager::VEC3_ZERO, 10000.0f, 8, 8);
+	CMeshSky* pMeshSky = CMeshSky::Create(CManager::VEC3_ZERO, CManager::VEC3_ZERO, 10000.0f, 8, 8);
+	pMeshSky->BindTexture(m_pTextureSystem->Regist("data\\TEXTURE\\sky000.png"));
+	pMeshSky->SetTexType(CTexture::TYPE_SYSTEM);
 
 	//FPS計測器初期化
 	m_nFPS = 0;
@@ -183,11 +191,23 @@ void CManager::Uninit(void)
 	}
 
 	//テクスチャ破棄
-	if (m_pTexture != nullptr)
+	if (m_pTextureSystem != nullptr)
 	{//テクスチャ終了
-		m_pTexture->Unload();
-		delete m_pTexture;
-		m_pTexture = nullptr;
+		m_pTextureSystem->Unload();
+		delete m_pTextureSystem;
+		m_pTextureSystem = nullptr;
+	}
+	if (m_pTextureX != nullptr)
+	{//テクスチャ終了
+		m_pTextureX->Unload();
+		delete m_pTextureX;
+		m_pTextureX = nullptr;
+	}
+	if (m_pTextureEditorPop != nullptr)
+	{//テクスチャ終了
+		m_pTextureEditorPop->Unload();
+		delete m_pTextureEditorPop;
+		m_pTextureEditorPop = nullptr;
 	}
 
 	//ライト破棄

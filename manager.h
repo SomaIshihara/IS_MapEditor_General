@@ -52,7 +52,9 @@ public:
 	static CDebugProc* GetDebProc(void) { return m_pDebProc; }
 	static CCamera* GetCamera(void) { return m_pCamera; }
 	static CLight* GetLight(void) { return m_pLight; }
-	static CTexture* GetTexture(void) { return m_pTexture; }
+	static CTexture* GetTextureEditorPop(void) { return m_pTextureEditorPop; }
+	static CTexture* GetTextureX(void) { return m_pTextureX; }
+	static CTexture* GetTextureSystem(void) { return m_pTextureSystem; }
 	static CMeshField* GetMeshField(void) { return m_pMeshField; }
 	static CVariableManager* GetVariableManager(void) { return m_pVariableManager; }
 
@@ -65,7 +67,9 @@ private:
 	static CPlayer* m_pPlayer;					//プレイヤー
 	static CCamera* m_pCamera;					//カメラ
 	static CLight* m_pLight;					//ライト
-	static CTexture* m_pTexture;				//テクスチャ
+	static CTexture* m_pTextureEditorPop;		//テクスチャ
+	static CTexture* m_pTextureX;				//Xファイル用テクスチャ
+	static CTexture* m_pTextureSystem;			//システム用テクスチャ
 	static CMeshField* m_pMeshField;			//メッシュフィールド
 	static CGUIAddObj* m_pGUIAddObj;			//オブジェクト追加GUI
 	static CGUIChangeObj* m_pGUIChangeObj;		//オブジェクト変更GUI

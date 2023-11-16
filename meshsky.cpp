@@ -23,6 +23,7 @@ CMeshSky::CMeshSky()
 	m_fRadius = CManager::FLT_ZERO;
 	m_nBlockWidth = CManager::INT_ZERO;
 	m_nBlockDepth = CManager::INT_ZERO;
+	m_texType = CTexture::TYPE_EDITORPOP;
 }
 
 //=================================
@@ -202,7 +203,6 @@ void CMeshSky::Update(void)
 void CMeshSky::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	//デバイスの取得
-	CTexture* pTexture = CManager::GetTexture();						//テクスチャオブジェクト取得
 	D3DXMATRIX mtxRot, mtxTrans;	//計算用
 
 	//ワールドマトリックス初期化
@@ -226,7 +226,17 @@ void CMeshSky::Draw(void)
 	pDevice->SetFVF(FVF_VERTEX_3D);
 
 	//テクスチャ設定
+	CTexture* pTexture = nullptr;
+	if (m_texType == CTexture::TYPE_EDITORPOP)
+	{//エディタ表示用
+		pTexture = CManager::GetTextureEditorPop();			//テクスチャオブジェクト取得
+	}
+	else if (m_texType == CTexture::TYPE_SYSTEM)
+	{
+		pTexture = CManager::GetTextureSystem();	//テクスチャオブジェクト取得
+	}
 	pDevice->SetTexture(0, pTexture->GetAddress(m_nIdxTexture));
+	
 
 	//両面カリングをON
 	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
@@ -276,8 +286,6 @@ CMeshSky* CMeshSky::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const f
 		pMeshField->m_nBlockWidth = nBlockWidth;
 		pMeshField->m_nBlockDepth = nBlockDepth;
 		pMeshField->Init();
-
-		pMeshField->BindTexture(CManager::GetTexture()->Regist("data\\TEXTURE\\sky000.png"));
 
 		return pMeshField;
 	}

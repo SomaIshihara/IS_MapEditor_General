@@ -9,6 +9,8 @@
 #include "xmodel.h"
 #include "objectX.h"
 #include "userdef.h"
+#include <fstream>
+#include <iostream>
 #include <string>
 
 //静的メンバ変数
@@ -53,7 +55,7 @@ CObjLoader::LOADRESULT CObjLoader::LoadData(const char * pPath)
 				{
 					char aPath[STR_LENGTH];
 					fread(&aPath[0], sizeof(char), STR_LENGTH, pFile);
-					CManager::GetTexture()->Load(&aPath[0]);
+					CManager::GetTextureEditorPop()->Load(&aPath[0]);
 				}
 				else if (code == BIN_CODE_MODEL_NUM)
 				{
@@ -307,4 +309,166 @@ CObjLoader::LOADRESULT CObjLoader::SaveData(const char * pPath)
 	{//なぜか開けなかった（なんで？）
 		return RES_ERR_FILE_NOTFOUND;
 	}
+}
+
+//========================
+//データ読み込み(TXT)
+//========================
+CObjLoader::LOADRESULT CObjLoader::LoadTXTData(const char * pPath)
+{
+	return RES_OK;
+}
+
+//========================
+//データ書き込み(TXT)
+//========================
+CObjLoader::LOADRESULT CObjLoader::SaveTXTData(const char * pPath)
+{
+	std::ofstream ofs(pPath);	//ファイル読み込み
+
+	//書き込み開始
+	{
+		CTexture* pTexture = CManager::GetTextureEditorPop();
+		CXModel* pModel = CXModel::GetTop();
+		int nNumTexture = pTexture->GetNumAll();
+		int nNumModel = CXModel::GetNumAll();
+		ofs << "#==============================================================================\n";
+		ofs << "#\n";
+		ofs << "# マップ配置スクリプトファイル [" << pPath << "]\n";
+		ofs << "# IS_MapEditor_Generalより生成\n";
+		ofs << "#\n";
+		ofs << "#==============================================================================\n";
+		ofs << "SCRIPT\n\n";
+
+		ofs << "#==============================================================================\n";
+		ofs << "# テクスチャ数\n";
+		ofs << "#==============================================================================\n";
+		ofs << "NUM_TEXTURE = " << nNumTexture << "\n";
+		ofs << "\n";
+
+		ofs << "#==============================================================================\n";
+		ofs << "# テクスチャファイル名\n";
+		ofs << "#==============================================================================\n";
+		for (int cnt = 0; cnt < nNumTexture; cnt++)
+		{
+			ofs << "TEXTURE_FILENAME = " << pTexture->GetPath(cnt) << "\n";
+		}
+		ofs << "\n";
+
+		ofs << "#==============================================================================\n";
+		ofs << "# モデル数\n";
+		ofs << "#==============================================================================\n";
+		ofs << "NUM_MODEL = " << nNumModel << "\n";
+		ofs << "\n";
+
+		ofs << "#==============================================================================\n";
+		ofs << "# モデルファイル名\n";
+		ofs << "#==============================================================================\n";
+		for (int cnt = 0; cnt < nNumModel; cnt++)
+		{
+			if (pModel != nullptr)
+			{
+				CXModel* pObjectNext = pModel->GetNext();
+
+				//パス書き込み
+				ofs << "MODEL_FILENAME = " << pModel->GetPath() << "\n";
+
+				pModel = pObjectNext;
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+		ofs << "\n";
+
+		ofs << "#==============================================================================\n";
+		ofs << "# カメラ情報\n";
+		ofs << "#==============================================================================\n";
+		ofs << "#CAMERASET(エディタ未実装のため手動で入力してください)\n";
+		ofs << "#	POS = 0 0 0\n";
+		ofs << "#	ROT = 0 0 0\n";
+		ofs << "#END_CAMERASET\n";
+		ofs << "\n";
+
+		ofs << "#==============================================================================\n";
+		ofs << "# ライト情報\n";
+		ofs << "#==============================================================================\n";
+		ofs << "#LIGHTSET(エディタ未実装のため手動で入力してください)\n";
+		ofs << "#	DIRECTION = 0 0 0\n";
+		ofs << "#	DIFFUSE = 0 0 0\n";
+		ofs << "#END_LIGHTSET\n";
+		ofs << "\n";
+
+		ofs << "#==============================================================================\n";
+		ofs << "# 空情報\n";
+		ofs << "#==============================================================================\n";
+		ofs << "#SKYSET(エディタ未実装のため手動で入力してください)\n";
+		ofs << "#	TEXTYPE = 0\n";
+		ofs << "#	MOVE = 0\n";
+		ofs << "#END_SKYSET\n";
+		ofs << "\n";
+
+		ofs << "#==============================================================================\n";
+		ofs << "# 山情報\n";
+		ofs << "#==============================================================================\n";
+		ofs << "#MOUNTAINSET(エディタ未実装のため手動で入力してください)\n";
+		ofs << "#	TEXTYPE = 0\n";
+		ofs << "#END_MOUNTAINSET\n";
+		ofs << "\n";
+
+		ofs << "#==============================================================================\n";
+		ofs << "# 床情報\n";
+		ofs << "#==============================================================================\n";
+		ofs << "#FIELDSET(エディタ未実装のため手動で入力してください)\n";
+		ofs << "#	TEXTYPE = 0\n";
+		ofs << "#	POS = 0 0 0\n";
+		ofs << "#	ROT = 0 0 0\n";
+		ofs << "#	BLOCK = 0 0\n";
+		ofs << "#	SIZE = 0 0\n";
+		ofs << "#	MOVE = 0 0\n";
+		ofs << "#END_FIELDSET\n";
+		ofs << "\n";
+
+		ofs << "#==============================================================================\n";
+		ofs << "# モデル配置\n";
+		ofs << "#==============================================================================\n";
+		CObjectX* pObject = CObjectX::GetTop();
+		while (pObject != nullptr)
+		{
+			CObjectX* pObjectNext = pObject->GetNext();
+
+			//開始書き込み
+			ofs << "MODELSET\n";
+
+			//モデル番号
+			int nModelNum = 0;
+			CXModel* pModel = CXModel::GetTop();
+			while (pModel != nullptr && pModel != pObject->GetModel())
+			{
+				pModel = pModel->GetNext();
+				nModelNum++;
+			}
+			ofs << "	TYPE = " << nModelNum << "\n";
+
+			//位置向き
+			D3DXVECTOR3 pos = pObject->GetPos();
+			D3DXVECTOR3 rot = pObject->GetRot();
+			ofs << "	POS = " << pos.x << " " << pos.y << " " << pos.z << "\n";
+			ofs << "	ROT = " << rot.x << " " << rot.y << " " << rot.z << "\n";
+			ofs << "#	影設定はエディタ未実装のため手動で入力してください\n";
+			ofs << "	SHADOW = 1\n";
+
+			//終了書き込み
+			ofs << "END_MODELSET\n";
+			ofs << "\n";
+
+			pObject = pObjectNext;
+		}
+
+		//終了文字
+		ofs << "END_SCRIPT\n";
+	}
+
+	return RES_OK;
 }

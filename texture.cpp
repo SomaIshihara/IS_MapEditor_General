@@ -10,7 +10,6 @@
 #include <stdio.h>
 
 //静的メンバ変数
-int CTexture::m_nNumAll = 0;
 const int CTexture::CODE_LENGTH = 256;
 
 //マクロ
@@ -33,6 +32,7 @@ CTexture::CTexture()
 		m_apTexture[cnt].nPatternWidth = 0;
 		m_apTexture[cnt].nPatternHeight = 0;
 	}
+	m_nNumAll = 0;
 }
 
 //=================================
@@ -243,6 +243,21 @@ int CTexture::GetPatHeight(int nIdx)
 	else
 	{//そんなものはない
 		return 0;	//返すものなんてない
+	}
+}
+
+//=================================
+//テクスチャパス取得
+//=================================
+char* CTexture::GetPath(int nIdx)
+{
+	if (m_nNumAll > nIdx && nIdx >= 0)
+	{//テクスチャ総数以内
+		return m_aFilepath[nIdx];	//テクスチャポインタ返す
+	}
+	else
+	{//そんなものはない
+		return nullptr;	//返すものなんてない
 	}
 }
 

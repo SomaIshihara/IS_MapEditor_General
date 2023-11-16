@@ -49,7 +49,7 @@ CXModel::~CXModel()
 CXModel* CXModel::Load(const char* pPath)
 {
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	//デバイス取得
-	CTexture* pTexture = CManager::GetTexture();						//テクスチャオブジェクト取得
+	CTexture* pTexture = CManager::GetTextureX();						//テクスチャオブジェクト取得
 
 	CXModel* pObject = m_pTop;	//先頭を入れる
 

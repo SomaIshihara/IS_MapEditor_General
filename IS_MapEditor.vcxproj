@@ -214,9 +214,13 @@
     <ClInclude Include="player.h" />
     <ClInclude Include="precompile.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="userdef.h" />
     <ClInclude Include="xmodel.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="IS_MapEditor.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

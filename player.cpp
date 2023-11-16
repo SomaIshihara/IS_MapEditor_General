@@ -104,6 +104,16 @@ void CPlayer::Move(void)
 		move.z += -cosf(rot.y) * MOVE_SPEED;
 	}
 
+	//ã‰º
+	if (pKeyboard->GetPress(DIK_SPACE) == true)
+	{
+		move.y += MOVE_SPEED * 0.75f;
+	}
+	if (pKeyboard->GetPress(DIK_LSHIFT) == true)
+	{
+		move.y -= MOVE_SPEED * 0.75f;
+	}
+
 	//ˆÚ“®
 	pCamera->SetCameraPos(move);
 }
