@@ -271,7 +271,6 @@ void CManager::Update(void)
 	m_pRenderer->Update();
 
 	//この時点で死亡フラグが立っているオブジェを殺す
-	CObjectX::Exclusion();
 	CObject::Death();
 
 	//FPS計測器の処理

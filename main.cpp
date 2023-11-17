@@ -61,10 +61,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 	RegisterClassEx(&wcex);
 
 	//クライアント領域を指定サイズに調整
-	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW , TRUE);
 
 	//ウィンドウを生成
-	//HMENU men = LoadMenu(hInstance, TEXT("IDR_MENU1"));
 	hWnd = CreateWindowEx(
 		0,										//拡張ウィンドウスタイル
 		CLASS_NAME,								//ウィンドウクラスの名前
@@ -75,7 +74,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 		(rect.right - rect.left),				//ウィンドウの幅
 		(rect.bottom - rect.top),				//ウィンドウの高さ
 		nullptr,								//親ウィンドウのハンドル
-		nullptr,	//メニューハンドルまたは子ウィンドウID
+		nullptr,								//メニューハンドルまたは子ウィンドウID
 		hInstance,								//インスタンスハンドル
 		nullptr									//ウィンドウ作成データ
 	);

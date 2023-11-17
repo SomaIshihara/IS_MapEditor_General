@@ -45,13 +45,20 @@ public:
 	void SetTexType(const CTexture::TYPE type) { m_texType = type; }
 
 	//除外
-	virtual void Exclusion(void){}
+	virtual void Exclusion(void);
 
 private:
 	int m_nIdxTexture;					//テクスチャ番号
 	LPDIRECT3DVERTEXBUFFER9 m_pVtxbuff;	//頂点バッファ
 	D3DXMATRIX m_mtxWorld;				//ワールドマトリ
 	CTexture::TYPE m_texType;			//テクスチャタイプ
+
+	//リスト
+	static CObjectBillboard* m_pTop;	//先頭オブジェクト
+	static CObjectBillboard* m_pCur;	//最後尾オブジェクト
+	CObjectBillboard* m_pNext;			//次のオブジェクト
+	CObjectBillboard* m_pPrev;			//前のオブジェクト
+	static int m_nNumAll;		//総数
 
 	D3DXVECTOR3 m_pos;	//位置
 	float m_fWidth;		//幅(X)

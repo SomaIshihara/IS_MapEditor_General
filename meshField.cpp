@@ -15,7 +15,7 @@ using namespace std;
 //=================================
 //コンストラクタ
 //=================================
-CMeshField::CMeshField() : CObject(PRIORITY_UNDEF04)
+CMeshField::CMeshField() : CObject(PRIORITY_04)
 {
 	//値クリア
 	m_pos = CManager::VEC3_ZERO;

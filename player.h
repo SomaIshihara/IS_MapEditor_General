@@ -11,6 +11,7 @@
 
 //前方宣言
 class CObjectX;
+class CManipulationObj;
 
 //プレイヤークラス
 class CPlayer
@@ -30,10 +31,12 @@ public:
 	void Update(void);
 
 	//選択解除
+	//void UnsetSelObj(void) { m_pObject = nullptr; }
 	void UnsetSelObj(void) { m_pObject = nullptr; }
 
 	//取得処理
-	CObjectX* GetSelObj(void) { return m_pObject; }
+	//CObjectX* GetSelObj(void) { return m_pObject; }
+	CManipulationObj* GetSelObj(void) { return m_pObject; }
 
 private:
 	//関数
@@ -42,7 +45,8 @@ private:
 	void Select(void);		//オブジェクト選択
 
 	D3DXVECTOR3 m_cursorPos;	//クリック前のカーソル位置
-	CObjectX* m_pObject;		//選択しているオブジェ
+	//CObjectX* m_pObject;		//選択しているオブジェ（旧
+	CManipulationObj* m_pObject;	//選択しているオブジェ
 };
 
 #endif

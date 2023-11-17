@@ -14,6 +14,8 @@
 #include "player.h"
 #include "xmodel.h"
 #include "objloader.h"
+#include "interface.h"
+#include "manipulation.h"
 
 //************************************************
 //オブジェ追加
@@ -21,7 +23,7 @@
 //=================================
 //コンストラクタ
 //=================================
-CGUIAddObj::CGUIAddObj() : CObject(PRIORITY_UI)
+CGUIAddObj::CGUIAddObj() : CObject(PRIORITY_05)
 {
 	m_SelectObj = nullptr;
 	m_pos = CManager::VEC3_ZERO;
@@ -221,7 +223,7 @@ CGUIAddObj* CGUIAddObj::Create(void)
 //=================================
 //コンストラクタ
 //=================================
-CGUIChangeObj::CGUIChangeObj() : CObject(PRIORITY_UI)
+CGUIChangeObj::CGUIChangeObj() : CObject(PRIORITY_05)
 {
 	m_pos = CManager::VEC3_ZERO;
 	m_rot = CManager::VEC3_ZERO;
@@ -294,14 +296,17 @@ void CGUIChangeObj::Update(void)
 	ImGui::SetNextWindowSize(ImVec2(335, 350), ImGuiCond_Once);	// サイズ
 	ImGui::Begin(u8"Change Model", nullptr, window_flags);			// 名前
 
-	CObjectX* pObject = CManager::GetPlayer()->GetSelObj();
+	CManipulationObj* pObject = CManager::GetPlayer()->GetSelObj();
 
 	//オブジェクト選択してる？
 	if (pObject != nullptr)
 	{//してるよ
+		//インターフェース取得
+		IManipulation* face = pObject->GetInterface();
+
 		float fPos[3], fRot[3];
-		D3DXVECTOR3 dxPos = pObject->GetPos();
-		D3DXVECTOR3 dxRot = pObject->GetRot();
+		D3DXVECTOR3 dxPos = face->GetPos();
+		D3DXVECTOR3 dxRot = face->GetRot();
 		//float配列に入れる（ImGUI用）
 		fPos[0] = dxPos.x;
 		fPos[1] = dxPos.y;
@@ -324,48 +329,51 @@ void CGUIChangeObj::Update(void)
 		dxRot.z = fRot[2];
 
 		//オブジェクトに入れる
-		pObject->SetPos(dxPos);
-		pObject->SetRot(dxRot);
+		face->SetPos(dxPos);
+		face->SetRot(dxRot);
 
 		//跡形もなく消し去るボタン
 		if (ImGui::Button("Delete"))
 		{//ぽちっとな
 			CManager::GetPlayer()->UnsetSelObj();
-			pObject->Uninit();
+			face->Delete();
 		}
 
-		//ユーザー定義
-		ImGui::Text("User Definition");
-
-		CVariableManager* pVariableManager = CManager::GetVariableManager();
-		for (int cnt = 0; cnt < pVariableManager->GetDefinedNum(); cnt++)
+		if (face->GetType() == IManipulation::TYPE_OBJX)
 		{
-			switch (pObject->GetVariable()[cnt]->GetType())
+			//ユーザー定義
+			ImGui::Text("User Definition");
+
+			CVariableManager* pVariableManager = CManager::GetVariableManager();
+			for (int cnt = 0; cnt < pVariableManager->GetDefinedNum(); cnt++)
 			{
-			case CVariable::Integer:
+				switch (face->GetVariable()[cnt]->GetType())
 				{
-					int nData = *(int*)pObject->GetVariable()[cnt]->GetData();
-					ImGui::InputInt(pObject->GetVariable()[cnt]->GetName(), &nData);
-					pObject->GetVariable()[cnt]->SetData(&nData);
+				case CVariable::Integer:
+				{
+					int nData = *(int*)face->GetVariable()[cnt]->GetData();
+					ImGui::InputInt(face->GetVariable()[cnt]->GetName(), &nData);
+					face->GetVariable()[cnt]->SetData(&nData);
 				}
 				break;
-			case CVariable::Float:
+				case CVariable::Float:
 				{
-					float fData = *(float*)pObject->GetVariable()[cnt]->GetData();
-					ImGui::InputFloat(pObject->GetVariable()[cnt]->GetName(), &fData);
-					pObject->GetVariable()[cnt]->SetData(&fData);
+					float fData = *(float*)face->GetVariable()[cnt]->GetData();
+					ImGui::InputFloat(face->GetVariable()[cnt]->GetName(), &fData);
+					face->GetVariable()[cnt]->SetData(&fData);
 				}
 				break;
-			case CVariable::Boolean:
+				case CVariable::Boolean:
 				{
-					bool bData = (*(unsigned char*)pObject->GetVariable()[cnt]->GetData() == 0xff) ? true : false;
-					ImGui::Checkbox(pObject->GetVariable()[cnt]->GetName(), &bData);
-					pObject->GetVariable()[cnt]->SetData(&bData);
+					bool bData = (*(unsigned char*)face->GetVariable()[cnt]->GetData() == 0xff) ? true : false;
+					ImGui::Checkbox(face->GetVariable()[cnt]->GetName(), &bData);
+					face->GetVariable()[cnt]->SetData(&bData);
 				}
 				break;
-			default:
-				assert(false);
-				break;
+				default:
+					assert(false);
+					break;
+				}
 			}
 		}
 	}

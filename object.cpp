@@ -4,7 +4,6 @@
 //Author:石原颯馬
 //
 //======================================================
-#include "main.h"
 #include "manager.h"
 #include "renderer.h"
 #include "camera.h"
@@ -65,6 +64,24 @@ void CObject::ReleaseAll(void)
 }
 
 //=================================
+//オブジェクト優先度別すべて破棄
+//=================================
+void CObject::ReleaseAll(const int nPriority)
+{
+	CObject* pObject = m_apTop[nPriority];	//先頭を入れる
+
+	while (pObject != nullptr)
+	{//最後尾まで回し続ける
+		CObject* pObjectNext = pObject->m_pNext;	//次のオブジェ保存
+		pObject->Uninit();		//破棄
+		pObject = pObjectNext;	//次を入れる
+	}
+
+	//殺す
+	Death();
+}
+
+//=================================
 //オブジェクトすべて更新
 //=================================
 void CObject::UpdateAll(void)
@@ -85,6 +102,9 @@ void CObject::UpdateAll(void)
 			pObject = pObjectNext;	//次を入れる
 		}
 	}
+
+	//殺す
+	Death();
 }
 
 //=================================
@@ -149,7 +169,10 @@ void CObject::Death(void)
 					m_apTop[cnt] = pObject->m_pNext;	//先頭を自分の次のオブジェにする
 				}
 
-				//成仏	
+				//リスト使用しているクラスの除外
+				pObject->Exclusion();
+
+				//成仏
 				delete pObject;	//自分自身破棄
 				m_nNumAll--;	//総数減らす
 			}

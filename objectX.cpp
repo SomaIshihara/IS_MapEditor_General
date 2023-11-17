@@ -4,13 +4,13 @@
 //Author:石原颯馬
 //
 //======================================================
-#include "main.h"
 #include "manager.h"
 #include "renderer.h"
 #include "texture.h"
 #include "input.h"
 #include "objectX.h"
 #include "xmodel.h"
+#include "manipulation.h"
 #include <assert.h>
 
 //静的メンバ変数
@@ -26,6 +26,7 @@ CObjectX::CObjectX(int nPriority) : CObject(nPriority)
 	//クリア
 	m_pos = CManager::VEC3_ZERO;
 	m_rot = CManager::VEC3_ZERO;
+	m_type = IManipulation::TYPE_OBJX;
 
 	if (m_pCur == nullptr)
 	{//最後尾がいない（すなわち先頭もいない）
@@ -40,10 +41,45 @@ CObjectX::CObjectX(int nPriority) : CObject(nPriority)
 		m_pNext = nullptr;			//自分の次のオブジェはいない
 	}
 	m_pCur = this;				//俺が最後尾
-	m_bExclusion = false;		//生きてる
 	m_pModel = nullptr;
-
+	m_pManipObj = nullptr;
+	m_bEnable = false;
 	m_nNumAll++;
+}
+
+//=================================
+//コンストラクタ（オーバーロード 位置向き）
+//=================================
+CObjectX::CObjectX(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, CXModel* pModel, int nPriority) : CObject(nPriority)
+{
+	//クリア
+	m_pos = pos;
+	m_rot = rot;
+
+	if (m_pCur == nullptr)
+	{//最後尾がいない（すなわち先頭もいない）
+		m_pTop = this;		//俺が先頭
+		m_pPrev = nullptr;		//前後誰もいない
+		m_pNext = nullptr;
+	}
+	else
+	{//最後尾がいる
+		m_pPrev = m_pCur;		//最後尾が自分の前のオブジェ
+		m_pCur->m_pNext = this;	//最後尾の次のオブジェが自分
+		m_pNext = nullptr;			//自分の次のオブジェはいない
+	}
+	m_pCur = this;				//俺が最後尾
+	m_pModel = pModel;			//モデル設定
+	m_bEnable = false;
+
+	//サイズ設定
+	D3DXVECTOR3 vtxMin, vtxMax;
+	m_pModel->GetCollision().GetVtx(&vtxMin, &vtxMax);
+	m_fWidth = vtxMax.x - vtxMin.x;
+	m_fHeight = vtxMax.y - vtxMin.y;
+	m_fDepth = vtxMax.z - vtxMin.z;
+
+	m_nNumAll++;	//オブジェクト個数増やす
 }
 
 //=================================
@@ -66,7 +102,12 @@ HRESULT CObjectX::Init(void)
 //========================
 void CObjectX::Uninit(void)
 {
-	m_bExclusion = true;		//除外予定
+	//操作インターフェース破棄
+	if (m_pManipObj != nullptr)
+	{
+		m_pManipObj->Uninit();
+		m_pManipObj = nullptr;
+	}
 
 	//自分自身破棄
 	Release();
@@ -141,14 +182,11 @@ CObjectX* CObjectX::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, CXModel
 
 	if (pObjX == nullptr)
 	{
-		//オブジェクトの生成
-		pObjX = new CObjectX;
+		//オブジェクト2Dの生成
+		pObjX = new CObjectX(pos, rot, pModel);
 
 		//初期化
 		pObjX->Init();
-		pObjX->m_pos = pos;
-		pObjX->m_rot = rot;
-		pObjX->m_pModel = pModel;
 
 		//追加変数設定
 		CVariableManager* pVariableManager = CManager::GetVariableManager();
@@ -159,6 +197,9 @@ CObjectX* CObjectX::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, CXModel
 			pObjX->m_apVariable[cnt] = pVariableManager->Declaration(pName);
 		}
 
+		//操作用オブジェクト生成
+		pObjX->m_pManipObj = CManipulationObj::Create(pObjX);
+
 		return pObjX;
 	}
 	else
@@ -168,9 +209,36 @@ CObjectX* CObjectX::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, CXModel
 }
 
 //========================
+//モデル設定とサイズ計測
+//========================
+void CObjectX::SetModel(CXModel * pModel)
+{
+	m_pModel = pModel;
+
+	D3DXVECTOR3 vtxMin, vtxMax;
+	m_pModel->GetCollision().GetVtx(&vtxMin, &vtxMax);
+	m_fWidth = vtxMax.x - vtxMin.x;
+	m_fHeight = vtxMax.y - vtxMin.y;
+	m_fDepth = vtxMax.z - vtxMin.z;
+}
+
+//========================
+//色変更設定
+//========================
+void CObjectX::SetColor(const bool bEnable, const D3DXCOLOR col)
+{
+	m_bEnable = bEnable;
+
+	if (bEnable == true)
+	{
+		m_changeColor = col;
+	}
+}
+
+//========================
 //オブジェクト単位除外処理
 //========================
-void CObjectX::Delete(CXModel * pTarget)
+void CObjectX::Delete(CXModel* pTarget)
 {
 	CObjectX* pObject = m_pTop;	//先頭を入れる
 
@@ -192,36 +260,24 @@ void CObjectX::Delete(CXModel * pTarget)
 //========================
 void CObjectX::Exclusion(void)
 {
-	CObjectX* pObject = m_pTop;	//先頭を入れる
-
-	while (pObject != nullptr)
-	{//最後尾まで回し続ける
-		CObjectX* pObjectNext = pObject->m_pNext;	//次のオブジェ保存
-
-		if (pObject->m_bExclusion == true)
-		{//死亡フラグが立ってる
-			if (pObject->m_pPrev != nullptr)
-			{//前にオブジェがいる
-				pObject->m_pPrev->m_pNext = pObject->m_pNext;	//前のオブジェの次のオブジェは自分の次のオブジェ
-			}
-			if (pObject->m_pNext != nullptr)
-			{
-				pObject->m_pNext->m_pPrev = pObject->m_pPrev;	//次のオブジェの前のオブジェは自分の前のオブジェ
-			}
-
-			if (m_pCur == pObject)
-			{//最後尾でした
-				m_pCur = pObject->m_pPrev;	//最後尾を自分の前のオブジェにする
-			}
-			if (m_pTop == pObject)
-			{
-				m_pTop = pObject->m_pNext;	//先頭を自分の次のオブジェにする
-			}
-
-			//成仏
-			m_nNumAll--;	//総数減らす
-		}
-
-		pObject = pObjectNext;	//次を入れる
+	if (m_pPrev != nullptr)
+	{//前にオブジェがいる
+		m_pPrev->m_pNext = m_pNext;	//前のオブジェの次のオブジェは自分の次のオブジェ
 	}
+	if (m_pNext != nullptr)
+	{
+		m_pNext->m_pPrev = m_pPrev;	//次のオブジェの前のオブジェは自分の前のオブジェ
+	}
+
+	if (m_pCur == this)
+	{//最後尾でした
+		m_pCur = m_pPrev;	//最後尾を自分の前のオブジェにする
+	}
+	if (m_pTop == this)
+	{
+		m_pTop = m_pNext;	//先頭を自分の次のオブジェにする
+	}
+
+	//成仏
+	m_nNumAll--;	//総数減らす
 }

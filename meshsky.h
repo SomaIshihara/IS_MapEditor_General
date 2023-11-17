@@ -47,6 +47,9 @@ public:
 
 	//高さ求める
 	float GetHeight(D3DXVECTOR3 posNew);
+
+	//除外（必要なし）
+	void Exclusion(void) {}
 private:
 	//関数
 	WORD* SetIdxSwaingField(int nCntWidth, WORD *pIdx);

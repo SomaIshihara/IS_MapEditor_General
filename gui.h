@@ -35,6 +35,9 @@ public:
 	float GetHeight(void) { return CManager::FLT_ZERO; }
 	float GetDepth(void) { return CManager::FLT_ZERO; }
 	int GetModelIdx(void) { return -1; }
+
+	//除外（必要なし）
+	void Exclusion(void){}
 private:
 	CXModel* m_SelectObj;
 	D3DXVECTOR3 m_pos, m_rot;
@@ -64,6 +67,9 @@ public:
 	float GetHeight(void) { return CManager::FLT_ZERO; }
 	float GetDepth(void) { return CManager::FLT_ZERO; }
 	int GetModelIdx(void) { return -1; }
+
+	//除外（必要なし）
+	void Exclusion(void) {}
 private:
 	D3DXVECTOR3 m_pos, m_rot;
 	bool m_bDragged;

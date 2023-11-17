@@ -13,6 +13,7 @@
 #include "camera.h"
 #include "objectX.h"
 #include "xmodel.h"
+#include "manipulation.h"
 
 //静的メンバ変数
 const float CPlayer::MOVE_SPEED = 10.0f;		//カメラ移動速度
@@ -156,19 +157,21 @@ void CPlayer::Select(void)
 	D3DXVECTOR3 posFar = mouse->ConvertClickPosToWorld(1.0f);
 
 	//近い何か
-	CObjectX* pObjectNear = nullptr;
+	CManipulationObj* pObjectNear = nullptr;
 	float fLengthNear = CManager::FLT_ZERO;
 
-	CObjectX* pObject = CObjectX::GetTop();	//リストの最初を持ってくる
+	CManipulationObj* pObject = CManipulationObj::GetTop();	//リストの最初を持ってくる
 
 	while (pObject != nullptr)
 	{//ぬるぬるになるまでやる
-		CObjectX* pObjectNext = pObject->GetNext();	//次のオブジェ保存
+		CManipulationObj* pObjectNext = pObject->GetNext();	//次のオブジェ保存
 		
 		//本処理
-		if (pObject->GetModel()->GetCollision().CollisionCheck(posNear, posFar, pObject->GetPos(), pObject->GetRot()))
+		IManipulation* pInterface = pObject->GetInterface();
+		CXModel* model = pInterface->GetModel();
+		if (model != nullptr&& model->GetCollision().CollisionCheck(posNear, posFar, pInterface->GetPos(), pInterface->GetRot()))
 		{
-			float fLength = D3DXVec3Length(&(pObject->GetPos() - posNear));
+			float fLength = D3DXVec3Length(&(pInterface->GetPos() - posNear));
 
 			if (pObjectNear == nullptr || fLengthNear > fLength)
 			{//近い

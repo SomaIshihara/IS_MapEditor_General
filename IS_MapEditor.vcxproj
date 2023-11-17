@@ -172,6 +172,7 @@
     <ClCompile Include="light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="manager.cpp" />
+    <ClCompile Include="manipulation.cpp" />
     <ClCompile Include="meshField.cpp" />
     <ClCompile Include="meshsky.cpp" />
     <ClCompile Include="object.cpp" />
@@ -204,9 +205,11 @@
     <ClInclude Include="ImGUI\imstb_textedit.h" />
     <ClInclude Include="ImGUI\imstb_truetype.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="interface.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="manager.h" />
+    <ClInclude Include="manipulation.h" />
     <ClInclude Include="meshField.h" />
     <ClInclude Include="meshsky.h" />
     <ClInclude Include="object.h" />

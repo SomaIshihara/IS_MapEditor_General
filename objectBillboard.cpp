@@ -10,6 +10,11 @@
 #include "input.h"
 #include "objectBillboard.h"
 
+//静的メンバ変数
+CObjectBillboard* CObjectBillboard::m_pTop = nullptr;
+CObjectBillboard* CObjectBillboard::m_pCur = nullptr;
+int CObjectBillboard::m_nNumAll = 0;
+
 //=================================
 //コンストラクタ（デフォルト）
 //=================================
@@ -21,6 +26,21 @@ CObjectBillboard::CObjectBillboard(int nPriority) : CObject(nPriority)
 	m_pos = CManager::VEC3_ZERO;
 	m_fWidth = CManager::FLT_ZERO;
 	m_fHeight = CManager::FLT_ZERO;
+
+	if (m_pCur == nullptr)
+	{//最後尾がいない（すなわち先頭もいない）
+		m_pTop = this;		//俺が先頭
+		m_pPrev = nullptr;		//前後誰もいない
+		m_pNext = nullptr;
+	}
+	else
+	{//最後尾がいる
+		m_pPrev = m_pCur;		//最後尾が自分の前のオブジェ
+		m_pCur->m_pNext = this;	//最後尾の次のオブジェが自分
+		m_pNext = nullptr;			//自分の次のオブジェはいない
+	}
+	m_pCur = this;				//俺が最後尾
+	m_nNumAll++;
 }
 
 //=================================
@@ -241,4 +261,31 @@ void CObjectBillboard::SetSize(const float fWidth, const float fDepth)
 
 	//頂点バッファをアンロック
 	m_pVtxbuff->Unlock();
+}
+
+//========================
+//除外
+//========================
+void CObjectBillboard::Exclusion(void)
+{
+	if (m_pPrev != nullptr)
+	{//前にオブジェがいる
+		m_pPrev->m_pNext = m_pNext;	//前のオブジェの次のオブジェは自分の次のオブジェ
+	}
+	if (m_pNext != nullptr)
+	{
+		m_pNext->m_pPrev = m_pPrev;	//次のオブジェの前のオブジェは自分の前のオブジェ
+	}
+
+	if (m_pCur == this)
+	{//最後尾でした
+		m_pCur = m_pPrev;	//最後尾を自分の前のオブジェにする
+	}
+	if (m_pTop == this)
+	{
+		m_pTop = m_pNext;	//先頭を自分の次のオブジェにする
+	}
+
+	//成仏
+	m_nNumAll--;	//総数減らす
 }

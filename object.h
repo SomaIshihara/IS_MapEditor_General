@@ -8,24 +8,41 @@
 #define _OBJECT_H_
 #include "main.h"
 
-//優先順位参考表
-typedef enum
-{
-	PRIORITY_BG = 0,		//BG
-	PRIORITY_UNDEF01,
-	PRIORITY_UNDEF02,
-	PRIORITY_DEFAULT,		//デフォルト
-	PRIORITY_UNDEF04,
-	PRIORITY_UI,			//UI
-	PRIORITY_PAUSE,			//ポーズ
-	PRIORITY_FADE,			//フェード
-	PRIORITY_MAX			//最大優先順位（これで足りるらしい）
-} PRIORITY;
+#define MAX_OBJ				(256)	//オブジェクト最大数
+#define DEATH_LIFE			(0)		//死亡体力
 
 //オブジェクトクラス
 class CObject
 {
 public:
+	//種類列挙
+	typedef enum
+	{
+		TYPE_NONE = 0,
+		TYPE_BLOCK,
+		TYPE_CHARACTER,
+		TYPE_SWITCH,
+		TYPE_GOAL,
+		TYPE_ITEM,
+		TYPE_TELEPORT,
+		TYPE_TUTORIALOBJ,
+		TYPE_MAX
+	} TYPE;
+
+	//優先順位参考表
+	typedef enum
+	{
+		PRIORITY_BG = 0,		//BG
+		PRIORITY_01,		//未定義
+		PRIORITY_02,		//未定義
+		PRIORITY_DEFAULT,		//デフォルト
+		PRIORITY_04,		//未定義
+		PRIORITY_05,			//UI向け
+		PRIORITY_PAUSE,			//ポーズ
+		PRIORITY_FADE,			//フェード
+		PRIORITY_MAX			//最大優先順位（これで足りるらしい）
+	} PRIORITY;
+
 	//コンストラクタ・デストラクタ
 	CObject(int nPriority = PRIORITY_DEFAULT);
 	virtual ~CObject();
@@ -37,20 +54,19 @@ public:
 	virtual void Draw(void) = 0;
 
 	//全オブジェクト系
-	static void ReleaseAll(void);
+	static void ReleaseAll(void);					//すべて
+	static void ReleaseAll(const int nPriority);	//優先度別
 	static void UpdateAll(void);
 	static void DrawAll(void);
 
 	//取得・設定
+	void SetType(TYPE type) { m_Type = type; }
+	TYPE GetType(void) { return m_Type; }
 	static CObject* GetTop(const int nPriority) { return m_apTop[nPriority]; }
 	CObject* GetNext(void) { return m_pNext; }
 
-	//純粋仮想取得
-	virtual D3DXVECTOR3 GetPos(void) = 0;
-	virtual D3DXVECTOR3 GetRot(void) = 0;
-	virtual float GetWidth(void) = 0;
-	virtual float GetHeight(void) = 0;
-	virtual float GetDepth(void) = 0;
+	//除外（リスト実装ありの場合）
+	virtual void Exclusion(void) = 0;
 
 	//死亡フラグが立っているオブジェを殺す
 	static void Death(void);
@@ -65,6 +81,7 @@ private:
 	CObject* m_pPrev;		//前のオブジェクト
 	static int m_nNumAll;	//総数
 	int m_nPriority;		//優先順位
+	TYPE m_Type;			//種類
 	bool m_bDeath;			//死亡フラグ
 };
 
