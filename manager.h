@@ -15,7 +15,6 @@ class CRenderer;
 class CPlayer;
 class CDebugProc;
 class CCamera;
-class CLight;
 class CTexture;
 class CMeshField;
 class CGUIAddObj;
@@ -51,7 +50,6 @@ public:
 	static CPlayer* GetPlayer(void) { return m_pPlayer; }
 	static CDebugProc* GetDebProc(void) { return m_pDebProc; }
 	static CCamera* GetCamera(void) { return m_pCamera; }
-	static CLight* GetLight(void) { return m_pLight; }
 	static CTexture* GetTextureEditorPop(void) { return m_pTextureEditorPop; }
 	static CTexture* GetTextureX(void) { return m_pTextureX; }
 	static CTexture* GetTextureSystem(void) { return m_pTextureSystem; }
@@ -66,7 +64,6 @@ private:
 	static CDebugProc* m_pDebProc;				//デバッグ
 	static CPlayer* m_pPlayer;					//プレイヤー
 	static CCamera* m_pCamera;					//カメラ
-	static CLight* m_pLight;					//ライト
 	static CTexture* m_pTextureEditorPop;		//テクスチャ
 	static CTexture* m_pTextureX;				//Xファイル用テクスチャ
 	static CTexture* m_pTextureSystem;			//システム用テクスチャ

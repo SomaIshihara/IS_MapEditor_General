@@ -175,6 +175,7 @@
     <ClCompile Include="meshField.cpp" />
     <ClCompile Include="meshsky.cpp" />
     <ClCompile Include="object.cpp" />
+    <ClCompile Include="objectBillboard.cpp" />
     <ClCompile Include="objectX.cpp" />
     <ClCompile Include="objloader.cpp" />
     <ClCompile Include="player.cpp" />
@@ -209,6 +210,7 @@
     <ClInclude Include="meshField.h" />
     <ClInclude Include="meshsky.h" />
     <ClInclude Include="object.h" />
+    <ClInclude Include="objectBillboard.h" />
     <ClInclude Include="objectX.h" />
     <ClInclude Include="objloader.h" />
     <ClInclude Include="player.h" />

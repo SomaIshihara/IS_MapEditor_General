@@ -49,6 +49,8 @@ HRESULT CGUIAddObj::Init(void)
 //========================
 void CGUIAddObj::Uninit(void)
 {
+	//é©ï™é©êgîjä¸
+	Release();
 }
 
 //========================
@@ -246,6 +248,8 @@ HRESULT CGUIChangeObj::Init(void)
 //========================
 void CGUIChangeObj::Uninit(void)
 {
+	//é©ï™é©êgîjä¸
+	Release();
 }
 
 //========================

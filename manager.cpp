@@ -18,6 +18,7 @@
 #include "meshsky.h"
 #include "gui.h"
 #include "xmodel.h"
+#include "objectBillboard.h"
 #include "userdef.h"
 
 //静的メンバ変数
@@ -32,7 +33,6 @@ CInputKeyboard* CManager::m_pInputKeyboard = nullptr;
 CInputMouse* CManager::m_pInputMouse = nullptr;
 CDebugProc* CManager::m_pDebProc = nullptr;
 CCamera* CManager::m_pCamera = nullptr;
-CLight* CManager::m_pLight = nullptr;
 CTexture* CManager::m_pTextureEditorPop = nullptr;
 CTexture* CManager::m_pTextureX = nullptr;
 CTexture* CManager::m_pTextureSystem = nullptr;
@@ -69,7 +69,6 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	m_pRenderer = new CRenderer;
 	m_pDebProc = new CDebugProc;
 	m_pCamera = new CCamera;
-	m_pLight = new CLight;
 	m_pTextureEditorPop = new CTexture;			//オブジェクト用
 	m_pTextureX = new CTexture;					//Xファイル用
 	m_pTextureSystem = new CTexture;			//システム用
@@ -106,10 +105,9 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	}
 
 	//ライト初期化
-	if (FAILED(m_pLight->Init()))
-	{
-		return E_FAIL;
-	}
+	CLight::Create(D3DXVECTOR3(0.22f, -0.87f, 0.44f), D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+	CLight::Create(D3DXVECTOR3(-0.18f, 0.88f, -0.44f), D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+	CLight::Create(D3DXVECTOR3(0.89f, -0.11f, 0.44f), D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 
 	//テクスチャ初期化
 	if (FAILED(m_pTextureEditorPop->Load("data\\preload.txt")))
@@ -119,6 +117,8 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 
 	//システムで必要なものをこっちで読み込み
 	m_pTextureSystem->Regist("data\\TEXTURE\\Tex_AddObj.png");
+	m_pTextureSystem->Regist("data\\TEXTURE\\Tex_Camera.png");
+	m_pTextureSystem->Regist("data\\TEXTURE\\Tex_Light.png");
 
 	//プレイヤー初期化
 	if (FAILED(m_pPlayer->Init()))
@@ -211,12 +211,7 @@ void CManager::Uninit(void)
 	}
 
 	//ライト破棄
-	if (m_pLight != nullptr)
-	{//ライト終了
-		m_pLight->Uninit();
-		delete m_pLight;
-		m_pLight = nullptr;
-	}
+	CLight::ReleaseAll();
 
 	//カメラ破棄
 	if (m_pCamera != nullptr)
@@ -272,7 +267,6 @@ void CManager::Update(void)
 	m_pInputKeyboard->Update();
 	m_pInputMouse->Update();
 	m_pCamera->Update();
-	m_pLight->Update();
 	m_pPlayer->Update();
 	m_pRenderer->Update();
 

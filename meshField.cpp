@@ -184,6 +184,9 @@ void CMeshField::Uninit(void)
 		m_pIdxBuff->Release();
 		m_pIdxBuff = nullptr;
 	}
+
+	//©•ª©g”jŠü
+	Release();
 }
 
 //=================================
