@@ -339,6 +339,16 @@ void CGUIChangeObj::Update(void)
 			face->Delete();
 		}
 
+		//モデル複製
+		if (ImGui::Button("Copy") == true)
+		{
+			if (face->GetType() == IManipulation::TYPE_OBJX)
+			{
+				IManipulation* pCopyInterface = CObjectX::Create(face->GetPos(), face->GetRot(), face->GetModel());	//同じものを生成
+				face = pCopyInterface;	//生成したものを選択
+			}
+		}
+
 		if (face->GetType() == IManipulation::TYPE_OBJX)
 		{
 			//ユーザー定義
