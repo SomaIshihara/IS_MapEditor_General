@@ -192,9 +192,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case WM_COMMAND:
-		static OPENFILENAME     ofn;
-		static TCHAR            szPath[MAX_PATH];
-		static TCHAR            szFile[MAX_PATH];
+		OPENFILENAME     ofn = {};
+		TCHAR            szPath[MAX_PATH];
+		ZeroMemory(&szPath[0], MAX_PATH);
+		TCHAR            szFile[MAX_PATH];
+		ZeroMemory(&szFile[0], MAX_PATH);
 
 		if (szPath[0] == TEXT('\0')) {
 			GetCurrentDirectory(MAX_PATH, szPath);
@@ -215,12 +217,23 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ofn.lpstrTitle = TEXT("モデルファイルを選択");
 			if (GetOpenFileName(&ofn)) {
 				//相対パス化
+				char aCurDir[256];
+				GetCurrentDirectory(256, &aCurDir[0]);
 				char aRelat[256];
-				int nPathLen = strlen(_strdup(szPath));
-				nPathLen++;	//スラッシュ2つ分も消す
-				strcpy(&aRelat[0], (_strdup(szFile) + nPathLen));
+				char* pChangeFileName = _strdup(szFile);	//strdupがmalloc使ってるみたいなのでfree必須
 
+				strcpy(&aRelat[0], pChangeFileName);
+				char* pSearch = strstr(&aRelat[0], &aCurDir[0]);
+				if (pSearch != nullptr)
+				{
+					int nPathLen = strlen(&aCurDir[0]);
+					nPathLen++;	//スラッシュ2つ分も消す
+					strcpy(&aRelat[0], &aRelat[nPathLen]);
+				}
+				
 				CXModel::Load(&aRelat[0]);
+
+				free(pChangeFileName);
 			}
 			break;
 		case ID_MLLOAD:
@@ -228,10 +241,19 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ofn.lpstrTitle = TEXT("モデルリストファイルを読み込み");
 			if (GetOpenFileName(&ofn)) {
 				//相対パス化
+				char aCurDir[256];
+				GetCurrentDirectory(256, &aCurDir[0]);
 				char aRelat[256];
-				int nPathLen = strlen(_strdup(szPath));
-				nPathLen++;	//スラッシュ2つ分も消す
-				strcpy(&aRelat[0], (_strdup(szFile) + nPathLen));
+				char* pChangeFileName = _strdup(szFile);	//strdupがmalloc使ってるみたいなのでfree必須
+
+				strcpy(&aRelat[0], pChangeFileName);
+				char* pSearch = strstr(&aRelat[0], &aCurDir[0]);
+				if (pSearch != nullptr)
+				{
+					int nPathLen = strlen(&aCurDir[0]);
+					nPathLen++;	//スラッシュ2つ分も消す
+					strcpy(&aRelat[0], &aRelat[nPathLen]);
+				}
 
 				CXModel::LoadList(&aRelat[0]);
 			}
@@ -242,12 +264,22 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ofn.Flags = OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_OVERWRITEPROMPT;
 			if (GetSaveFileName(&ofn)) {
 				//相対パス化
+				char aCurDir[256];
+				GetCurrentDirectory(256, &aCurDir[0]);
 				char aRelat[256];
-				int nPathLen = strlen(_strdup(szPath));
-				nPathLen++;	//スラッシュ2つ分も消す
-				strcpy(&aRelat[0], (_strdup(szFile) + nPathLen));
+				char* pChangeFileName = _strdup(szFile);	//strdupがmalloc使ってるみたいなのでfree必須
+
+				strcpy(&aRelat[0], pChangeFileName);
+				char* pSearch = strstr(&aRelat[0], &aCurDir[0]);
+				if (pSearch != nullptr)
+				{
+					int nPathLen = strlen(&aCurDir[0]);
+					nPathLen++;	//スラッシュ2つ分も消す
+					strcpy(&aRelat[0], &aRelat[nPathLen]);
+				}
+
 				//ファイルパスに拡張子がなければ付け足す
-				char* pSearch = strstr(&aRelat[0], ".isml");
+				pSearch = strstr(&aRelat[0], ".isml");
 				if (pSearch == nullptr)
 				{
 					strcat(&aRelat[0], ".isml");
@@ -261,10 +293,19 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ofn.lpstrTitle = TEXT("マップデータファイルを読み込み");
 			if (GetOpenFileName(&ofn)) {
 				//相対パス化
+				char aCurDir[256];
+				GetCurrentDirectory(256, &aCurDir[0]);
 				char aRelat[256];
-				int nPathLen = strlen(_strdup(szPath));
-				nPathLen++;	//スラッシュ2つ分も消す
-				strcpy(&aRelat[0], (_strdup(szFile) + nPathLen));
+				char* pChangeFileName = _strdup(szFile);	//strdupがmalloc使ってるみたいなのでfree必須
+
+				strcpy(&aRelat[0], pChangeFileName);
+				char* pSearch = strstr(&aRelat[0], &aCurDir[0]);
+				if (pSearch != nullptr)
+				{
+					int nPathLen = strlen(&aCurDir[0]);
+					nPathLen++;	//スラッシュ2つ分も消す
+					strcpy(&aRelat[0], &aRelat[nPathLen]);
+				}
 
 				CObjLoader::LoadData(&aRelat[0]);
 			}
@@ -275,12 +316,22 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ofn.Flags = OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_OVERWRITEPROMPT;
 			if (GetSaveFileName(&ofn)) {
 				//相対パス化
+				char aCurDir[256];
+				GetCurrentDirectory(256, &aCurDir[0]);
 				char aRelat[256];
-				int nPathLen = strlen(_strdup(szPath));
-				nPathLen++;	//スラッシュ2つ分も消す
-				strcpy(&aRelat[0], (_strdup(szFile) + nPathLen));
+				char* pChangeFileName = _strdup(szFile);	//strdupがmalloc使ってるみたいなのでfree必須
+
+				strcpy(&aRelat[0], pChangeFileName);
+				char* pSearch = strstr(&aRelat[0], &aCurDir[0]);
+				if (pSearch != nullptr)
+				{
+					int nPathLen = strlen(&aCurDir[0]);
+					nPathLen++;	//スラッシュ2つ分も消す
+					strcpy(&aRelat[0], &aRelat[nPathLen]);
+				}
+
 				//ファイルパスに拡張子がなければ付け足す
-				char* pSearch = strstr(&aRelat[0], ".ismd");
+				pSearch = strstr(&aRelat[0], ".ismd");
 				if (pSearch == nullptr)
 				{
 					strcat(&aRelat[0], ".ismd");
@@ -295,12 +346,22 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ofn.Flags = OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_OVERWRITEPROMPT;
 			if (GetSaveFileName(&ofn)) {
 				//相対パス化
+				char aCurDir[256];
+				GetCurrentDirectory(256, &aCurDir[0]);
 				char aRelat[256];
-				int nPathLen = strlen(_strdup(szPath));
-				nPathLen++;	//スラッシュ2つ分も消す
-				strcpy(&aRelat[0], (_strdup(szFile) + nPathLen));
+				char* pChangeFileName = _strdup(szFile);	//strdupがmalloc使ってるみたいなのでfree必須
+
+				strcpy(&aRelat[0], pChangeFileName);
+				char* pSearch = strstr(&aRelat[0], &aCurDir[0]);
+				if (pSearch != nullptr)
+				{
+					int nPathLen = strlen(&aCurDir[0]);
+					nPathLen++;	//スラッシュ2つ分も消す
+					strcpy(&aRelat[0], &aRelat[nPathLen]);
+				}
+
 				//ファイルパスに拡張子がなければ付け足す
-				char* pSearch = strstr(&aRelat[0], ".txt");
+				pSearch = strstr(&aRelat[0], ".txt");
 				if (pSearch == nullptr)
 				{
 					strcat(&aRelat[0], ".txt");
