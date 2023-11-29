@@ -38,9 +38,6 @@ public:
 	//取得
 	static CObjectX* GetTop(void) { return m_pTop; }
 	CObjectX* GetNext(void) { return m_pNext; }
-	float GetWidth(void) { return m_fWidth; }
-	float GetHeight(void) { return m_fHeight; }
-	float GetDepth(void) { return m_fDepth; }
 	CObject* GetObj(void) { return this; }
 	D3DXVECTOR3 GetMove(void) { return CManager::VEC3_ZERO; }
 
@@ -55,6 +52,7 @@ public:
 	D3DXVECTOR3 GetRot(void) { return m_rot; }
 	void SetRot(const D3DXVECTOR3 rot) { m_rot = rot; }
 	IManipulation::TYPE GetType(void) { return m_type; }
+	CCollision* GetCollision(void);
 	void Delete(void) { Uninit(); }
 	//Xのみ
 	CVariable** GetVariable(void) { return &m_apVariable[0]; }
@@ -62,6 +60,15 @@ public:
 	//ライトのみ（実装必要なし）
 	D3DXCOLOR GetDiffuse(void) { return D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f); }
 	void SetDiffuse(const D3DXCOLOR col) {}
+	//メッシュフィールドとビルボードとXのみ
+	void SetSize(const float fWidth, const float fHeight, const float fDepth) {}
+	float GetWidth(void) { return m_fWidth; }
+	float GetHeight(void) { return m_fHeight; }
+	float GetDepth(void) { return m_fDepth; }
+	//メッシュフィールドのみ（実装必要なし）
+	void SetBlockNum(const int nWidth, const int nDepth) {};
+	int GetBlockWidth(void) { return 0; }
+	int GetBlockDepth(void) { return 0; }
 
 	//使用モデル単位で消す
 	static void Delete(CXModel* pTarget);

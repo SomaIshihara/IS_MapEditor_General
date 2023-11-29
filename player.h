@@ -31,12 +31,13 @@ public:
 	void Update(void);
 
 	//‘I‘ğ‰ğœ
-	//void UnsetSelObj(void) { m_pObject = nullptr; }
 	void UnsetSelObj(void) { m_pObject = nullptr; }
 
 	//æ“¾ˆ—
-	//CObjectX* GetSelObj(void) { return m_pObject; }
 	CManipulationObj* GetSelObj(void) { return m_pObject; }
+
+	//’Ç‰Áˆ—
+	void CreateMF(void);
 
 private:
 	//ŠÖ”

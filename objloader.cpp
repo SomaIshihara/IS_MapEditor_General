@@ -9,6 +9,7 @@
 #include "xmodel.h"
 #include "objectX.h"
 #include "userdef.h"
+#include "meshField.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -420,15 +421,22 @@ CObjLoader::LOADRESULT CObjLoader::SaveTXTData(const char * pPath)
 		ofs << "#==============================================================================\n";
 		ofs << "# 床情報\n";
 		ofs << "#==============================================================================\n";
-		ofs << "#FIELDSET(エディタ未実装のため手動で入力してください)\n";
-		ofs << "#	TEXTYPE = 0\n";
-		ofs << "#	POS = 0 0 0\n";
-		ofs << "#	ROT = 0 0 0\n";
-		ofs << "#	BLOCK = 0 0\n";
-		ofs << "#	SIZE = 0 0\n";
-		ofs << "#	MOVE = 0 0\n";
-		ofs << "#END_FIELDSET\n";
-		ofs << "\n";
+		CMeshField* pMeshField = CMeshField::GetTop();
+		while (pMeshField != nullptr)
+		{
+			D3DXVECTOR3 pos = pMeshField->GetPos();
+			D3DXVECTOR3 rot = pMeshField->GetRot();
+			ofs << "FIELDSET\n";
+			ofs << "	TEXTYPE = 0 (エディタ未実装のため手動で入力してください)\n";
+			ofs << "	POS = " << pos.x << " " << pos.y << " " << pos.z << "\n";
+			ofs << "	ROT = " << rot.x << " " << rot.y << " " << rot.z << "\n";
+			ofs << "	BLOCK = " << pMeshField->GetBlockWidth() << " " << pMeshField->GetBlockDepth() << "\n";
+			ofs << "	SIZE = " << pMeshField->GetWidth() << " " << pMeshField->GetDepth() << "\n";
+			ofs << "	MOVE = 0 0 (エディタ未実装のため手動で入力してください)\n";
+			ofs << "END_FIELDSET\n";
+			ofs << "\n";
+			pMeshField = pMeshField->GetNext();
+		}
 
 		ofs << "#==============================================================================\n";
 		ofs << "# モデル配置\n";

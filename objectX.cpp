@@ -74,7 +74,7 @@ CObjectX::CObjectX(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, CXModel* pModel
 
 	//ƒTƒCƒYÝ’è
 	D3DXVECTOR3 vtxMin, vtxMax;
-	m_pModel->GetCollision().GetVtx(&vtxMin, &vtxMax);
+	m_pModel->GetCollision()->GetVtx(&vtxMin, &vtxMax);
 	m_fWidth = vtxMax.x - vtxMin.x;
 	m_fHeight = vtxMax.y - vtxMin.y;
 	m_fDepth = vtxMax.z - vtxMin.z;
@@ -216,7 +216,7 @@ void CObjectX::SetModel(CXModel * pModel)
 	m_pModel = pModel;
 
 	D3DXVECTOR3 vtxMin, vtxMax;
-	m_pModel->GetCollision().GetVtx(&vtxMin, &vtxMax);
+	m_pModel->GetCollision()->GetVtx(&vtxMin, &vtxMax);
 	m_fWidth = vtxMax.x - vtxMin.x;
 	m_fHeight = vtxMax.y - vtxMin.y;
 	m_fDepth = vtxMax.z - vtxMin.z;
@@ -233,6 +233,19 @@ void CObjectX::SetColor(const bool bEnable, const D3DXCOLOR col)
 	{
 		m_changeColor = col;
 	}
+}
+
+//========================
+//“–‚½‚è”»’èŽæ“¾
+//========================
+CCollision* CObjectX::GetCollision(void)
+{
+	if (m_pModel != nullptr)
+	{
+		return m_pModel->GetCollision();
+	}
+
+	return nullptr;
 }
 
 //========================

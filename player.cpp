@@ -13,6 +13,7 @@
 #include "camera.h"
 #include "objectX.h"
 #include "xmodel.h"
+#include "meshField.h"
 #include "manipulation.h"
 
 //静的メンバ変数
@@ -71,6 +72,15 @@ void CPlayer::Update(void)
 	{//位置特定
 		Select();
 	}
+}
+
+//=================================
+//メッシュフィールドを生成
+//=================================
+void CPlayer::CreateMF(void)
+{
+	CMeshField* pMeshField = CMeshField::Create(D3DXVECTOR3(0.0f, 10.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 32.0f, 32.0f, 4, 4);
+	m_pObject = pMeshField->GetManipulationObj();
 }
 
 //=================================
@@ -168,8 +178,8 @@ void CPlayer::Select(void)
 		
 		//本処理
 		IManipulation* pInterface = pObject->GetInterface();
-		CXModel* model = pInterface->GetModel();
-		if (model != nullptr&& model->GetCollision().CollisionCheck(posNear, posFar, pInterface->GetPos(), pInterface->GetRot()))
+		CCollision* collision = pInterface->GetCollision();
+		if (collision != nullptr && collision->CollisionCheck(posNear, posFar, pInterface->GetPos(), pInterface->GetRot()))
 		{
 			float fLength = D3DXVec3Length(&(pInterface->GetPos() - posNear));
 

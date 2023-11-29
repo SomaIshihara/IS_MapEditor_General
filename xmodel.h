@@ -41,7 +41,7 @@ public:
 	DWORD GetNumMat(void) { return m_dwNumMatModel; }
 	int* GetIdxTexture(void) { return m_pIdxtexture; }
 	char* GetPath(void) { return m_pFilePath; }
-	CCollision GetCollision(void) { return m_collision; }
+	CCollision* GetCollision(void) { return m_pCollision; }
 	static int GetNumAll(void) { return m_nNumAll; }
 
 	//リスト取得
@@ -63,7 +63,7 @@ private:
 	int* m_pIdxtexture;			//テクスチャ番号（動的確保）
 
 	char* m_pFilePath;			//ファイルパス（文字数分動的確保）
-	CCollision m_collision;		//コリジョン
+	CCollision* m_pCollision;		//コリジョン
 };
 
 #endif // !_XMODEL_H_

@@ -11,6 +11,7 @@
 
 //前方宣言
 class CXModel;
+__interface IManipulation;
 
 //オブジェクト追加GUIクラス
 class CGUIAddObj : public CObject
@@ -71,8 +72,17 @@ public:
 	//除外（必要なし）
 	void Exclusion(void) {}
 private:
+	//関数
+	void DispUI_OBJX(IManipulation* face);
+	void DispUI_MF(IManipulation* face);
+
+	//変数
 	D3DXVECTOR3 m_pos, m_rot;
 	bool m_bDragged;
+	bool m_bSizeChange;
+	bool m_bBlockChange;
+	float m_aSize[2];
+	int m_aBlock[2];
 };
 
 #endif // !_GUI_H_

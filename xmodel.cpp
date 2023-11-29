@@ -137,7 +137,8 @@ CXModel* CXModel::Load(const char* pPath)
 			}
 
 			//設定
-			pObject->m_collision.SetVtx(vtxMin, vtxMax);
+			pObject->m_pCollision = new CCollision;
+			pObject->m_pCollision->SetVtx(vtxMin, vtxMax);
 
 			//頂点バッファアンロック
 			pObject->m_pMesh->UnlockVertexBuffer();
@@ -234,6 +235,13 @@ void CXModel::Unload(void)
 	{
 		delete[] m_pFilePath;
 		m_pFilePath = nullptr;
+	}
+
+	//当たり判定破棄
+	if (m_pCollision != nullptr)
+	{
+		delete m_pCollision;
+		m_pCollision = nullptr;
 	}
 
 	//成仏	

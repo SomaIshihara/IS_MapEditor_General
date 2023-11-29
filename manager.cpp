@@ -145,6 +145,8 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	m_pMeshField = CMeshField::Create(D3DXVECTOR3(-1280.0f, 0.0f, 1280.0f), CManager::VEC3_ZERO, 64.0f, 64.0f, 40, 40);
 	m_pMeshField->BindTexture(m_pTextureSystem->Regist("data\\TEXTURE\\line.png"));
 	m_pMeshField->SetTexType(CTexture::TYPE_SYSTEM);
+	m_pMeshField->GetCollision()->SetVtx(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+	m_pMeshField->Exclusion();
 
 	CMeshSky* pMeshSky = CMeshSky::Create(CManager::VEC3_ZERO, CManager::VEC3_ZERO, 10000.0f, 8, 8);
 	pMeshSky->BindTexture(m_pTextureSystem->Regist("data\\TEXTURE\\sky000.png"));

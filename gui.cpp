@@ -13,6 +13,7 @@
 #include "input.h"
 #include "player.h"
 #include "xmodel.h"
+#include "meshField.h"
 #include "objloader.h"
 #include "interface.h"
 #include "manipulation.h"
@@ -228,6 +229,12 @@ CGUIChangeObj::CGUIChangeObj() : CObject(PRIORITY_05)
 	m_pos = CManager::VEC3_ZERO;
 	m_rot = CManager::VEC3_ZERO;
 	m_bDragged = false;
+	m_bSizeChange = false;
+	m_bBlockChange = false;
+	m_aSize[0] = 0.0f;
+	m_aSize[1] = 0.0f;
+	m_aBlock[0] = 1;
+	m_aBlock[1] = 1;
 }
 
 //=================================
@@ -304,29 +311,13 @@ void CGUIChangeObj::Update(void)
 		//インターフェース取得
 		IManipulation* face = pObject->GetInterface();
 
-		float fPos[3], fRot[3];
 		D3DXVECTOR3 dxPos = face->GetPos();
 		D3DXVECTOR3 dxRot = face->GetRot();
-		//float配列に入れる（ImGUI用）
-		fPos[0] = dxPos.x;
-		fPos[1] = dxPos.y;
-		fPos[2] = dxPos.z;
-		fRot[0] = dxRot.x;
-		fRot[1] = dxRot.y;
-		fRot[2] = dxRot.z;
 
 		//UI表示
 		ImGui::Text("[Selected]");
-		ImGui::DragFloat3("Pos", fPos, 1.0f);
-		ImGui::DragFloat3("Rot", fRot, 0.01f, -D3DX_PI, D3DX_PI);
-
-		//Vec3型に入れる
-		dxPos.x = fPos[0];
-		dxPos.y = fPos[1];
-		dxPos.z = fPos[2];
-		dxRot.x = fRot[0];
-		dxRot.y = fRot[1];
-		dxRot.z = fRot[2];
+		ImGui::DragFloat3("Pos", dxPos, 1.0f);
+		ImGui::DragFloat3("Rot", dxRot, 0.01f, -D3DX_PI, D3DX_PI);
 
 		//オブジェクトに入れる
 		face->SetPos(dxPos);
@@ -339,51 +330,28 @@ void CGUIChangeObj::Update(void)
 			face->Delete();
 		}
 
-		//モデル複製
-		if (ImGui::Button("Copy") == true)
+		//各オブジェごとの処理
+		if (face->GetType() == IManipulation::TYPE_OBJX)
 		{
-			if (face->GetType() == IManipulation::TYPE_OBJX)
+			DispUI_OBJX(face);
+
+			//モデル複製
+			if (ImGui::Button("Copy") == true)
 			{
 				IManipulation* pCopyInterface = CObjectX::Create(face->GetPos(), face->GetRot(), face->GetModel());	//同じものを生成
 				face = pCopyInterface;	//生成したものを選択
 			}
 		}
-
-		if (face->GetType() == IManipulation::TYPE_OBJX)
+		else if (face->GetType() == IManipulation::TYPE_MESHFIELD)
 		{
-			//ユーザー定義
-			ImGui::Text("User Definition");
+			DispUI_MF(face);
 
-			CVariableManager* pVariableManager = CManager::GetVariableManager();
-			for (int cnt = 0; cnt < pVariableManager->GetDefinedNum(); cnt++)
+			//モデル複製
+			if (ImGui::Button("Copy") == true)
 			{
-				switch (face->GetVariable()[cnt]->GetType())
-				{
-				case CVariable::Integer:
-				{
-					int nData = *(int*)face->GetVariable()[cnt]->GetData();
-					ImGui::InputInt(face->GetVariable()[cnt]->GetName(), &nData);
-					face->GetVariable()[cnt]->SetData(&nData);
-				}
-				break;
-				case CVariable::Float:
-				{
-					float fData = *(float*)face->GetVariable()[cnt]->GetData();
-					ImGui::InputFloat(face->GetVariable()[cnt]->GetName(), &fData);
-					face->GetVariable()[cnt]->SetData(&fData);
-				}
-				break;
-				case CVariable::Boolean:
-				{
-					bool bData = (*(unsigned char*)face->GetVariable()[cnt]->GetData() == 0xff) ? true : false;
-					ImGui::Checkbox(face->GetVariable()[cnt]->GetName(), &bData);
-					face->GetVariable()[cnt]->SetData(&bData);
-				}
-				break;
-				default:
-					assert(false);
-					break;
-				}
+				IManipulation* pCopyInterface = CMeshField::Create(face->GetPos(), face->GetRot(), face->GetWidth(),
+					face->GetDepth(), face->GetBlockWidth(), face->GetBlockDepth());	//同じものを生成
+				face = pCopyInterface;	//生成したものを選択
 			}
 		}
 	}
@@ -422,5 +390,133 @@ CGUIChangeObj* CGUIChangeObj::Create(void)
 	else
 	{
 		return nullptr;
+	}
+}
+
+//========================
+//OBJXの時のUI表示
+//========================
+void CGUIChangeObj::DispUI_OBJX(IManipulation* face)
+{
+	//ユーザー定義
+	ImGui::Text("User Definition");
+
+	CVariableManager* pVariableManager = CManager::GetVariableManager();
+	for (int cnt = 0; cnt < pVariableManager->GetDefinedNum(); cnt++)
+	{
+		switch (face->GetVariable()[cnt]->GetType())
+		{
+		case CVariable::Integer:
+		{
+			int nData = *(int*)face->GetVariable()[cnt]->GetData();
+			ImGui::InputInt(face->GetVariable()[cnt]->GetName(), &nData);
+			face->GetVariable()[cnt]->SetData(&nData);
+		}
+		break;
+		case CVariable::Float:
+		{
+			float fData = *(float*)face->GetVariable()[cnt]->GetData();
+			ImGui::InputFloat(face->GetVariable()[cnt]->GetName(), &fData);
+			face->GetVariable()[cnt]->SetData(&fData);
+		}
+		break;
+		case CVariable::Boolean:
+		{
+			bool bData = (*(unsigned char*)face->GetVariable()[cnt]->GetData() == 0xff) ? true : false;
+			ImGui::Checkbox(face->GetVariable()[cnt]->GetName(), &bData);
+			face->GetVariable()[cnt]->SetData(&bData);
+		}
+		break;
+		default:
+			assert(false);
+			break;
+		}
+	}
+}
+
+//========================
+//メッシュフィールドの時のUI表示
+//========================
+void CGUIChangeObj::DispUI_MF(IManipulation* face)
+{
+	//メッシュフィールド専用パラメータ
+	ImGui::Text("MeshField Paramater");
+
+	//必要な変数
+	//UI表示前
+	float aSize[2];
+	int aBlock[2];
+	if (m_bSizeChange == true)
+	{
+		aSize[0] = m_aSize[0];
+		aSize[1] = m_aSize[1];
+	}
+	else
+	{
+		aSize[0] = face->GetWidth();
+		aSize[1] = face->GetDepth();
+	}
+	if (m_bBlockChange == true)
+	{
+		aBlock[0] = m_aBlock[0];
+		aBlock[1] = m_aBlock[1];
+	}
+	else
+	{
+		aBlock[0] = face->GetBlockWidth();
+		aBlock[1] = face->GetBlockDepth();
+	}
+
+	//UI表示後
+	float aSizeChange[2];
+	aSizeChange[0] = aSize[0];
+	aSizeChange[1] = aSize[1];
+
+	int aBlockChange[2];
+	aBlockChange[0] = aBlock[0];
+	aBlockChange[1] = aBlock[1];
+
+	//調整
+	ImGui::DragFloat2("BlockSize", &aSizeChange[0], 1.0f, 1.0f);
+	ImGui::DragInt2("BlockNum", &aBlockChange[0],0.1f,1);
+	
+	//変更があれば設定
+	if (aSize[0] != aSizeChange[0] || aSize[1] != aSizeChange[1])
+	{
+		m_bSizeChange = true;
+		m_aSize[0] = aSizeChange[0];
+		if (m_aSize[0] <= 0.0f)
+		{
+			m_aSize[0] = 1.0f;
+		}
+		m_aSize[1] = aSizeChange[1];
+		if (m_aSize[1] <= 0.0f)
+		{
+			m_aSize[1] = 1.0f;
+		}
+	}
+	else if(m_bSizeChange == true && CManager::GetInputMouse()->GetPress(CInputMouse::CLICK_LEFT) == false)
+	{
+		m_bSizeChange = false;
+		face->SetSize(m_aSize[0], 0.0f, m_aSize[1]);
+	}
+	if (aBlock[0] != aBlockChange[0] || aBlock[1] != aBlockChange[1])
+	{
+		m_bBlockChange = true;
+		m_aBlock[0] = aBlockChange[0];
+		if (m_aBlock[0] <= 0)
+		{
+			m_aBlock[0] = 1;
+		}
+		m_aBlock[1] = aBlockChange[1];
+		if (m_aBlock[1] <= 0)
+		{
+			m_aBlock[1] = 1;
+		}
+	}
+	else if (m_bBlockChange == true && CManager::GetInputMouse()->GetPress(CInputMouse::CLICK_LEFT) == false)
+	{
+		m_bBlockChange = false;
+		face->SetBlockNum(m_aBlock[0], m_aBlock[1]);
 	}
 }

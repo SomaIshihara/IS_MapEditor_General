@@ -11,6 +11,7 @@
 #include "resource.h"
 #include "xmodel.h"
 #include "objloader.h"
+#include "player.h"
 
 //ƒƒ‚ƒŠ”j‰óŒŸo
 #include <crtdbg.h>
@@ -381,6 +382,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case ID_CAMSET:
 			break;
 		case ID_LIGSET:
+			break;
+		case ID_MFSET:
+			CManager::GetPlayer()->CreateMF();
+			break;
+		case ID_BILSET:
 			break;
 		}
 		break;
