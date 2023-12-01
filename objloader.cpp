@@ -5,7 +5,7 @@
 //
 //======================================================
 #include "objloader.h"
-#include "texture.h"
+//#include "texture.h"
 #include "xmodel.h"
 #include "objectX.h"
 #include "userdef.h"
@@ -14,13 +14,12 @@
 #include <iostream>
 #include <string>
 
-//静的メンバ変数
-const int CObjLoader::STR_LENGTH = 256;
+using objloader::LOADRESULT;
 
 //========================
 //データ読み込み
 //========================
-CObjLoader::LOADRESULT CObjLoader::LoadData(const char * pPath)
+LOADRESULT objloader::LoadData(const char * pPath)
 {
 	FILE* pFile;
 	BINCODE code;
@@ -145,7 +144,7 @@ CObjLoader::LOADRESULT CObjLoader::LoadData(const char * pPath)
 //========================
 //データ書き込み
 //========================
-CObjLoader::LOADRESULT CObjLoader::SaveData(const char * pPath)
+LOADRESULT objloader::SaveData(const char * pPath)
 {
 	FILE* pFile;
 
@@ -154,8 +153,7 @@ CObjLoader::LOADRESULT CObjLoader::SaveData(const char * pPath)
 	if (pFile != nullptr)
 	{//普通に開けた
 		//開始コード書き込み
-		BINCODE code = BIN_CODE_SCRIPT;
-		fwrite(&code, sizeof(BINCODE), 1, pFile);
+		WriteCode(pFile, BIN_CODE_SCRIPT);
 
 		//定義変数取得
 		CVariableManager* pVariableManager = CManager::GetVariableManager();
@@ -163,51 +161,52 @@ CObjLoader::LOADRESULT CObjLoader::SaveData(const char * pPath)
 		for (int cnt = 0; cnt < pVariableManager->GetDefinedNum(); cnt++)
 		{
 			//ユーザー定義変数書き込み開始
-			code = BIN_CODE_USERDEF;
-			fwrite(&code, sizeof(BINCODE), 1, pFile);
+			WriteCode(pFile, BIN_CODE_USERDEF);
 
-			char aDefVariableStr[STR_LENGTH] = "";
+			std::string str = "";
 
 			//型書き込み
 			switch (ppDefined[cnt]->type)
 			{
 			case CVariable::Integer:
 			{
-				strcat(&aDefVariableStr[0], "int ");
+				str += "int ";
 
 				//変数名書き込み
-				strcat(&aDefVariableStr[0], &ppDefined[cnt]->pName[0]);
+				str += ppDefined[cnt]->pName;
 
 				//初期値書き込み
-				strcat(&aDefVariableStr[0], " = ");
+				str += " = ";
 				int nData = 0;
 				nData = *(int*)ppDefined[cnt]->pData;
-				strcat(&aDefVariableStr[0], std::to_string(nData).c_str());
+				str += std::to_string(nData);
 			}
 				break;
 			case CVariable::Float:
 			{
-				strcat(&aDefVariableStr[0], "float ");
+				str += "float ";
 
 				//変数名書き込み
-				strcat(&aDefVariableStr[0], &ppDefined[cnt]->pName[0]);
+				str += ppDefined[cnt]->pName;
 
 				//初期値書き込み
-				strcat(&aDefVariableStr[0], " = ");
+				str += " = ";
 				float fData = 0;
 				fData = *(float*)ppDefined[cnt]->pData;
-				strcat(&aDefVariableStr[0], std::to_string(fData).c_str());
+				str += std::to_string(fData);
 			}
 				break;
 			case CVariable::Boolean:
-				strcat(&aDefVariableStr[0], "bool ");
+			{
+				str += "bool ";
 
 				//変数名書き込み
-				strcat(&aDefVariableStr[0], &ppDefined[cnt]->pName[0]);
+				str += ppDefined[cnt]->pName;
 
 				//初期値書き込み
-				strcat(&aDefVariableStr[0], " = ");
-				strcat(&aDefVariableStr[0], ((bool)ppDefined[cnt]->pData == true) ? "true" : "false");
+				str += " = ";
+				str += ((bool)ppDefined[cnt]->pData == true) ? "true" : "false";
+			}
 				break;
 			default:
 				assert(false);
@@ -215,36 +214,33 @@ CObjLoader::LOADRESULT CObjLoader::SaveData(const char * pPath)
 			}
 
 			//ファイルに書き込み
-			fwrite(&aDefVariableStr[0], sizeof(char), STR_LENGTH, pFile);
+			fwrite(str.c_str(), sizeof(char), STR_LENGTH, pFile);
 		}
 
 		//モデル個数書き込み
-		code = BIN_CODE_MODEL_NUM;
+		WriteCode(pFile, BIN_CODE_MODEL_NUM);
 		int nNumAll = CXModel::GetNumAll();
-		fwrite(&code, sizeof(BINCODE), 1, pFile);
 		fwrite(&nNumAll,sizeof(int),1,pFile);
 
 		//モデルファイルパス書き込み
-		code = BIN_CODE_MODEL_FILENAME;
 		CXModel* pModel = CXModel::GetTop();	//リスト書き込み体制
 		while (pModel != nullptr)
 		{
 			CXModel* pObjectNext = pModel->GetNext();
 
-			fwrite(&code, sizeof(BINCODE), 1, pFile);						//コード
+			WriteCode(pFile, BIN_CODE_MODEL_FILENAME);
 			fwrite(pModel->GetPath(), sizeof(char), STR_LENGTH, pFile);	//データ
 
 			pModel = pObjectNext;
 		}
 
 		//モデル情報書き込み
-		code = BIN_CODE_MODELSET;
 		CObjectX* pObject = CObjectX::GetTop();
 		while (pObject != nullptr)
 		{
 			CObjectX* pObjectNext = pObject->GetNext();
 
-			fwrite(&code, sizeof(BINCODE), 1, pFile);				//コード
+			WriteCode(pFile, BIN_CODE_MODELSET);
 			fwrite(&pObject->GetPos(), sizeof(D3DXVECTOR3), 1, pFile);
 			fwrite(&pObject->GetRot(), sizeof(D3DXVECTOR3), 1, pFile);
 
@@ -300,8 +296,7 @@ CObjLoader::LOADRESULT CObjLoader::SaveData(const char * pPath)
 		}
 
 		//終了コード書き込み
-		code = BIN_CODE_END_SCRIPT;
-		fwrite(&code, sizeof(BINCODE), 1, pFile);
+		WriteCode(pFile, BIN_CODE_END_SCRIPT);
 
 		fclose(pFile);
 		return RES_OK;
@@ -315,7 +310,7 @@ CObjLoader::LOADRESULT CObjLoader::SaveData(const char * pPath)
 //========================
 //データ読み込み(TXT)
 //========================
-CObjLoader::LOADRESULT CObjLoader::LoadTXTData(const char * pPath)
+LOADRESULT objloader::LoadTXTData(const char * pPath)
 {
 	return RES_OK;
 }
@@ -323,7 +318,7 @@ CObjLoader::LOADRESULT CObjLoader::LoadTXTData(const char * pPath)
 //========================
 //データ書き込み(TXT)
 //========================
-CObjLoader::LOADRESULT CObjLoader::SaveTXTData(const char * pPath)
+LOADRESULT objloader::SaveTXTData(const char * pPath)
 {
 	std::ofstream ofs(pPath);	//ファイル読み込み
 
@@ -427,12 +422,12 @@ CObjLoader::LOADRESULT CObjLoader::SaveTXTData(const char * pPath)
 			D3DXVECTOR3 pos = pMeshField->GetPos();
 			D3DXVECTOR3 rot = pMeshField->GetRot();
 			ofs << "FIELDSET\n";
-			ofs << "	TEXTYPE = 0 (エディタ未実装のため手動で入力してください)\n";
+			ofs << "	TEXTYPE = 0 #(エディタ未実装のため手動で入力してください)\n";
 			ofs << "	POS = " << pos.x << " " << pos.y << " " << pos.z << "\n";
 			ofs << "	ROT = " << rot.x << " " << rot.y << " " << rot.z << "\n";
 			ofs << "	BLOCK = " << pMeshField->GetBlockWidth() << " " << pMeshField->GetBlockDepth() << "\n";
 			ofs << "	SIZE = " << pMeshField->GetWidth() << " " << pMeshField->GetDepth() << "\n";
-			ofs << "	MOVE = 0 0 (エディタ未実装のため手動で入力してください)\n";
+			ofs << "	MOVE = 0 0 #(エディタ未実装のため手動で入力してください)\n";
 			ofs << "END_FIELDSET\n";
 			ofs << "\n";
 			pMeshField = pMeshField->GetNext();
@@ -479,4 +474,12 @@ CObjLoader::LOADRESULT CObjLoader::SaveTXTData(const char * pPath)
 	}
 
 	return RES_OK;
+}
+
+//========================
+//バイナリコード書き込み
+//========================
+void objloader::WriteCode(FILE * pFile, BINCODE code)
+{
+	fwrite(&code, sizeof(BINCODE), 1, pFile);
 }

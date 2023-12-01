@@ -308,7 +308,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					strcpy(&aRelat[0], &aRelat[nPathLen]);
 				}
 
-				CObjLoader::LoadData(&aRelat[0]);
+				objloader::LoadData(&aRelat[0]);
 			}
 			break;
 		case ID_MDWRITE:
@@ -338,7 +338,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					strcat(&aRelat[0], ".ismd");
 				}
 
-				CObjLoader::SaveData(&aRelat[0]);
+				objloader::SaveData(&aRelat[0]);
 			}
 			break;
 		case ID_TXTWRITE:
@@ -368,7 +368,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					strcat(&aRelat[0], ".txt");
 				}
 
-				CObjLoader::SaveTXTData(&aRelat[0]);
+				objloader::SaveTXTData(&aRelat[0]);
 			}
 			break;
 		case ID_EXIT:

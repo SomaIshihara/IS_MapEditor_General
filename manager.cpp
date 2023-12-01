@@ -142,7 +142,7 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	ImGui_ImplWin32_Init(hWnd);
 	ImGui_ImplDX9_Init(m_pRenderer->GetDevice());// GetGlyphRangesJapanese
 
-	m_pMeshField = CMeshField::Create(D3DXVECTOR3(-1280.0f, 0.0f, 1280.0f), CManager::VEC3_ZERO, 64.0f, 64.0f, 40, 40);
+	m_pMeshField = CMeshField::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), CManager::VEC3_ZERO, 64.0f, 64.0f, 40, 40);
 	m_pMeshField->BindTexture(m_pTextureSystem->Regist("data\\TEXTURE\\line.png"));
 	m_pMeshField->SetTexType(CTexture::TYPE_SYSTEM);
 	m_pMeshField->GetCollision()->SetVtx(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));

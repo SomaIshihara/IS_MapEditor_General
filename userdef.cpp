@@ -124,6 +124,8 @@ void CVariableManager::ReleaseAll(void)
 	{
 		if (m_definedVariable[cnt] != nullptr)
 		{
+			delete[] m_definedVariable[cnt]->pName;
+			delete[] m_definedVariable[cnt]->pData;
 			delete m_definedVariable[cnt];
 			m_definedVariable[cnt] = nullptr;
 		}

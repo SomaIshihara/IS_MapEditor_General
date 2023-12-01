@@ -46,6 +46,9 @@ public:
 	CManipulationObj* GetManipulationObj(void) { return m_pManipObj; }
 	static CMeshField* GetTop(void) { return m_pTop; }
 	CMeshField* GetNext(void) { return m_pNext; }
+	float GetOneWidth(void) { return m_fWidth; }
+	float GetOneHeight(void) { return 0.0f; }
+	float GetOneDepth(void) { return m_fDepth; }
 
 	//インターフェース分
 	//共通
@@ -64,9 +67,9 @@ public:
 	void SetDiffuse(const D3DXCOLOR col) {}
 	//メッシュフィールドとビルボードとXのみ
 	void SetSize(const float fWidth, const float fHeight, const float fDepth) { m_fWidth = fWidth; m_fDepth = fDepth; SetVtxBuff(); }
-	float GetWidth(void) { return m_fWidth; }
+	float GetWidth(void) { return (m_fWidth * m_nBlockWidth * 0.5f); }
 	float GetHeight(void) { return 0.0f; }
-	float GetDepth(void) { return m_fDepth; }
+	float GetDepth(void) { return (m_fDepth * m_nBlockDepth * 0.5f); }
 	//メッシュフィールドのみ
 	void SetBlockNum(const int nWidth, const int nDepth) { m_nBlockWidth = nWidth; m_nBlockDepth = nDepth; SetVtxNum(); }
 	int GetBlockWidth(void) { return m_nBlockWidth; }
@@ -105,7 +108,6 @@ private:
 	float m_fDepth;		//奥行
 	int m_nBlockWidth;	//ブロック幅
 	int m_nBlockDepth;	//ブロック奥行
-
 
 	//リスト
 	static CMeshField* m_pTop;	//先頭オブジェクト

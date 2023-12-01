@@ -6,34 +6,13 @@
 //======================================================
 #ifndef _OBJLOADER_H_
 #define _OBJLOADER_H_
-#include "main.h"
-#include "manager.h"
-#include "object.h"
 
-typedef unsigned char BINCODE;
-//バイナリのコード内容
-//システム(0b00xxxxxx)
-#define BIN_CODE_SYSTEM				(0b00 << 6)
-#define BIN_CODE_SCRIPT				(BIN_CODE_SYSTEM + 0b000000)
-#define BIN_CODE_END_SCRIPT			(BIN_CODE_SYSTEM + 0b000001)
-#define BIN_CODE_USERDEF			(BIN_CODE_SYSTEM + 0b000010)
-//モデル系(0b01xxxxxx)
-#define BIN_CODE_MODEL				(0b01 << 6)
-#define BIN_CODE_TEXTURE_FILENAME	(BIN_CODE_MODEL + 0b000000)
-#define BIN_CODE_MODEL_FILENAME		(BIN_CODE_MODEL + 0b000001)
-#define BIN_CODE_MODELSET			(BIN_CODE_MODEL + 0b000010)
-#define BIN_CODE_TEXTURE_NUM		(BIN_CODE_MODEL + 0b000011)
-#define BIN_CODE_MODEL_NUM			(BIN_CODE_MODEL + 0b000100)
-//モーション系(0b10xxxxxx)
-#define BIN_CODE_MOTION				(0b10 << 6)
-
-//オブジェクト読み込みクラス
-class CObjLoader
+//オブジェクト読み込み
+namespace objloader
 {
-public:
-	//静的const
-	static const int STR_LENGTH;	//文字列の長さ
-
+	const int STR_LENGTH = 256;
+	
+	//読み込み結果
 	enum LOADRESULT
 	{
 		RES_OK = 0,
@@ -41,11 +20,30 @@ public:
 		RES_MAX
 	};
 
+	//バイナリのコード内容
+	typedef unsigned char BINCODE;		//格納用
+	//システム(0b00xxxxxx)
+	const int BIN_CODE_SYSTEM			= (0b00 << 6);
+	const int BIN_CODE_SCRIPT			= (BIN_CODE_SYSTEM + 0b000000);
+	const int BIN_CODE_END_SCRIPT		= (BIN_CODE_SYSTEM + 0b000001);
+	const int BIN_CODE_USERDEF			= (BIN_CODE_SYSTEM + 0b000010);
+	//モデル系(0b01xxxxxx)
+	const int BIN_CODE_MODEL			= (0b01 << 6);
+	const int BIN_CODE_TEXTURE_FILENAME = (BIN_CODE_MODEL + 0b000000);
+	const int BIN_CODE_MODEL_FILENAME	= (BIN_CODE_MODEL + 0b000001);
+	const int BIN_CODE_MODELSET			= (BIN_CODE_MODEL + 0b000010);
+	const int BIN_CODE_TEXTURE_NUM		= (BIN_CODE_MODEL + 0b000011);
+	const int BIN_CODE_MODEL_NUM		= (BIN_CODE_MODEL + 0b000100);
+	const int BIN_CODE_FIELDSET			= (BIN_CODE_MODEL + 0b000101);
+	//モーション系(0b10xxxxxx)
+	const int BIN_CODE_MOTION			= (0b10 << 6);
+
 	//読み込み
-	static LOADRESULT LoadData(const char* pPath);
-	static LOADRESULT SaveData(const char* pPath);
-	static LOADRESULT LoadTXTData(const char* pPath);
-	static LOADRESULT SaveTXTData(const char* pPath);
-};
+	LOADRESULT LoadData(const char* pPath);
+	LOADRESULT SaveData(const char* pPath);
+	LOADRESULT LoadTXTData(const char* pPath);
+	LOADRESULT SaveTXTData(const char* pPath);
+	void WriteCode(FILE* pFile, BINCODE code);
+}
 
 #endif // !_OBJECT_H_

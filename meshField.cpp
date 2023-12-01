@@ -173,7 +173,7 @@ CMeshField* CMeshField::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, con
 		pMeshField->m_pManipObj = CManipulationObj::Create(pMeshField);
 
 		//当たり判定設定
-		pMeshField->m_collision.SetVtx(D3DXVECTOR3(-fWidth * nBlockWidth, -1.0f, -fDepth * nBlockDepth), D3DXVECTOR3(fWidth * nBlockWidth, -1.0f, fDepth * nBlockDepth));
+		pMeshField->m_collision.SetVtx(D3DXVECTOR3(-fWidth * nBlockWidth * 0.5f, -1.0f, -fDepth * nBlockDepth * 0.5f), D3DXVECTOR3(fWidth * nBlockWidth * 0.5f, -1.0f, fDepth * nBlockDepth * 0.5f));
 
 		return pMeshField;
 	}
@@ -243,7 +243,8 @@ void CMeshField::SetVtxBuff(void)
 	for (int nCount = 0; nCount < (m_nBlockWidth + 1) * (m_nBlockDepth + 1); nCount++)
 	{
 		//頂点座標（相対座標）
-		pVtx[nCount].pos = D3DXVECTOR3(m_fWidth * (nCount % (m_nBlockWidth + 1)), 0.0f, -m_fDepth * (nCount / (m_nBlockWidth + 1)));
+		pVtx[nCount].pos = D3DXVECTOR3(m_fWidth * (((float)(nCount % (m_nBlockWidth + 1)) - 0.5f * (m_nBlockWidth))),
+			0.0f, -m_fDepth * (((float)(nCount / (m_nBlockWidth + 1))) - 0.5f * (m_nBlockDepth)));
 
 		//カラー
 		pVtx[nCount].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
@@ -323,6 +324,9 @@ void CMeshField::SetVtxNum(void)
 	//頂点・インデックス設定
 	SetVtxBuff();
 	SetIdxBuff();
+
+	//当たり判定も再設定
+	m_collision.SetVtx(D3DXVECTOR3(-m_fWidth * m_nBlockWidth * 0.5f, -1.0f, -m_fDepth * m_nBlockDepth * 0.5f), D3DXVECTOR3(m_fWidth * m_nBlockWidth * 0.5f, -1.0f, m_fDepth * m_nBlockDepth * 0.5f));
 }
 
 //=================================
