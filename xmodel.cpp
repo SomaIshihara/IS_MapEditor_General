@@ -8,6 +8,7 @@
 #include "manager.h"
 #include "renderer.h"
 #include "texture.h"
+#include "objectX.h"
 
 //静的メンバ変数
 CXModel* CXModel::m_pTop = nullptr;
@@ -243,6 +244,9 @@ void CXModel::Unload(void)
 		delete m_pCollision;
 		m_pCollision = nullptr;
 	}
+
+	//自分を使っているObjectXをすべて消す
+	CObjectX::Delete(this);
 
 	//成仏	
 	delete this;	//自分自身破棄

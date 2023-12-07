@@ -5,7 +5,7 @@
 //
 //======================================================
 #include "objloader.h"
-//#include "texture.h"
+#include "player.h"
 #include "xmodel.h"
 #include "objectX.h"
 #include "userdef.h"
@@ -34,6 +34,12 @@ LOADRESULT objloader::LoadData(const char * pPath)
 	{//開けた
 		//定義変数初期化
 		pVariableManager->ReleaseAll();
+
+		//読み込みモデル全破棄（一緒に配置モデルも消える）
+		CXModel::UnloadAll();
+
+		//モデルの選択解除
+		CManager::GetPlayer()->UnsetSelObj();
 
 		while (1)
 		{
@@ -130,6 +136,21 @@ LOADRESULT objloader::LoadData(const char * pPath)
 					pVariableManager->Analysis(&aDefVariableStr[0]);
 				}
 			}
+		}
+
+		//読み込みに使用したファイルパスを破棄
+		if (ppFilePath != nullptr)
+		{
+			for (int cnt = 0; cnt < nReadedModel; cnt++)
+			{
+				if (ppFilePath[cnt] != nullptr)
+				{
+					delete[] ppFilePath[cnt];
+					ppFilePath[cnt] = nullptr;
+				}
+			}
+			delete[] ppFilePath;
+			ppFilePath = nullptr;
 		}
 
 		fclose(pFile);

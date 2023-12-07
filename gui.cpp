@@ -171,7 +171,6 @@ void CGUIAddObj::Update(void)
 		if (ImGui::Button("OK", ImVec2(120, 0))) 
 		{ 
 			CManager::GetPlayer()->UnsetSelObj();
-			CObjectX::Delete(m_SelectObj);
 			m_SelectObj->Unload();
 			m_SelectObj = nullptr;
 			ImGui::CloseCurrentPopup(); 
@@ -324,7 +323,8 @@ void CGUIChangeObj::Update(void)
 		face->SetRot(dxRot);
 
 		//ÕŒ`‚à‚È‚­Á‚µ‹Ž‚éƒ{ƒ^ƒ“
-		if (ImGui::Button("Delete"))
+		CInputKeyboard* pKeyboard = CManager::GetInputKeyboard();
+		if (ImGui::Button("Delete") || pKeyboard->GetTrigger(DIK_DELETE))
 		{//‚Û‚¿‚Á‚Æ‚È
 			CManager::GetPlayer()->UnsetSelObj();
 			face->Delete();

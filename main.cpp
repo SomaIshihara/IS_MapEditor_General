@@ -290,26 +290,36 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		case ID_MDLOAD:
-			ofn.lpstrFilter = TEXT("マップデータファイル(*.ismd)\0*.ismd\0");
-			ofn.lpstrTitle = TEXT("マップデータファイルを読み込み");
-			if (GetOpenFileName(&ofn)) {
-				//相対パス化
-				char aCurDir[256];
-				GetCurrentDirectory(256, &aCurDir[0]);
-				char aRelat[256];
-				char* pChangeFileName = _strdup(szFile);	//strdupがmalloc使ってるみたいなのでfree必須
+			nID = MessageBox(hWnd, "保存していない場合データが失われますが読み込みますか？", "破棄メッセージ", MB_YESNO);
 
-				strcpy(&aRelat[0], pChangeFileName);
-				char* pSearch = strstr(&aRelat[0], &aCurDir[0]);
-				if (pSearch != nullptr)
-				{
-					int nPathLen = strlen(&aCurDir[0]);
-					nPathLen++;	//スラッシュ2つ分も消す
-					strcpy(&aRelat[0], &aRelat[nPathLen]);
+			if (nID == IDYES)
+			{
+				ofn.lpstrFilter = TEXT("マップデータファイル(*.ismd)\0*.ismd\0");
+				ofn.lpstrTitle = TEXT("マップデータファイルを読み込み");
+				if (GetOpenFileName(&ofn)) {
+					//相対パス化
+					char aCurDir[256];
+					GetCurrentDirectory(256, &aCurDir[0]);
+					char aRelat[256];
+					char* pChangeFileName = _strdup(szFile);	//strdupがmalloc使ってるみたいなのでfree必須
+
+					strcpy(&aRelat[0], pChangeFileName);
+					char* pSearch = strstr(&aRelat[0], &aCurDir[0]);
+					if (pSearch != nullptr)
+					{
+						int nPathLen = strlen(&aCurDir[0]);
+						nPathLen++;	//スラッシュ2つ分も消す
+						strcpy(&aRelat[0], &aRelat[nPathLen]);
+					}
+
+					objloader::LoadData(&aRelat[0]);
 				}
-
-				objloader::LoadData(&aRelat[0]);
 			}
+			else
+			{
+				return 0;
+			}
+			
 			break;
 		case ID_MDWRITE:
 			ofn.lpstrFilter = TEXT("マップデータファイル(*.ismd)\0*.ismd\0");

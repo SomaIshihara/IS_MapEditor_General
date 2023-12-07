@@ -102,6 +102,15 @@ HRESULT CObjectX::Init(void)
 //========================
 void CObjectX::Uninit(void)
 {
+	//変数破棄
+	for (int cnt = 0; cnt < VARIABLE_NUM; cnt++)
+	{
+		if (m_apVariable[cnt] != nullptr)
+		{
+			m_apVariable[cnt]->Release();
+		}
+	}
+
 	//操作インターフェース破棄
 	if (m_pManipObj != nullptr)
 	{
@@ -109,6 +118,7 @@ void CObjectX::Uninit(void)
 		m_pManipObj = nullptr;
 	}
 
+	m_nNumAll--;
 	//自分自身破棄
 	Release();
 }
